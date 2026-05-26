@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor U as Użytkownik
+    participant SPA as Aplikacja webowa
+    participant API as Backend API
+    participant SLS as ShoppingListService
+    participant DB as Baza danych
+
+    U->>SPA: Wybierz przepisy i kliknij "Dodaj do listy zakupów"
+    SPA->>API: POST /shopping-list/fill { recipeIds: [...] }
+    API->>SLS: fillMissingFromRecipes(userId, recipeIds)
+    SLS->>DB: getOrCreateActiveList(userId)
+    DB-->>SLS: ShoppingList
+    SLS->>DB: pobierz RecipeIngredient dla recipeIds
+    DB-->>SLS: składniki wybranych przepisów z ilościami
+    SLS->>DB: pobierz PantryItem dla userId
+    DB-->>SLS: stan spiżarni
+    loop dla każdego brakującego składnika
+        SLS->>SLS: oblicz brakującą ilość
+        SLS->>DB: upsert ShoppingListItem (zsumuj jeśli istnieje)
+        DB-->>SLS: potwierdzenie
+    end
+    SLS-->>API: zaktualizowana ShoppingList z pozycjami
+    API-->>SPA: 200 OK { shoppingList: {...} }
+    SPA-->>U: wyświetl zaktualizowaną listę zakupów

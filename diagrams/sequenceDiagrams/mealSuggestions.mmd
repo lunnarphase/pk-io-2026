@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor U as Użytkownik
+    participant SPA as Aplikacja webowa
+    participant API as Backend API
+    participant MSS as MealSuggestionService
+    participant DB as Baza danych
+    participant NutAPI as Zewnętrzne API Żywność
+
+    U->>SPA: Kliknij "Generuj propozycje"
+    SPA->>API: GET /suggestions
+    API->>MSS: suggestRecipes(userId)
+    MSS->>DB: pobierz PantryItem dla userId
+    DB-->>MSS: lista PantryItem
+    MSS->>DB: pobierz ACTIVE Recipe z RecipeIngredient dla userId
+    DB-->>MSS: lista Recipe (ze składem)
+    loop dla każdego Recipe
+        MSS->>MSS: normalizuj jednostki składników
+        MSS->>MSS: porównaj skład z spiżarnią
+    end
+    alt składnik bez danych kalorycznych
+        MSS->>NutAPI: GET /nutrition?foodId={externalFoodId}
+        NutAPI-->>MSS: dane kaloryczne
+        MSS->>DB: zapisz dane kaloryczne dla Ingredient
+    end
+    MSS-->>API: lista dopasowanych Recipe
+    API-->>SPA: 200 OK { recipes: [...] }
+    SPA-->>U: wyświetl listę propozycji posiłków

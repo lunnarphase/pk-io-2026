@@ -1,0 +1,21 @@
+graph LR
+    User(("A01\nUżytkownik"))
+    NutAPI(["A02\nZewnętrzne API\nŻywność"])
+    RecAPI(["A03\nZewnętrzne API\nPrzepisy"])
+
+    subgraph sys["System SmartRecipe"]
+        UC01("UC01\nZarządzanie przepisami")
+        UC02("UC02\nZarządzanie spiżarnią")
+        UC03("UC03\nGenerowanie propozycji\nposiłków")
+        UC04("UC04\nZarządzanie listą\nzakupów")
+        UC05("UC05\nWyszukiwanie\nprzepisów zewnętrznych")
+    end
+
+    User --- UC01
+    User --- UC02
+    User --- UC03
+    User --- UC04
+    User --- UC05
+    UC03 -. "<<uses>>" .-> NutAPI
+    UC05 -. "<<uses>>" .-> RecAPI
+    UC04 -. "<<extend>>" .-> UC02

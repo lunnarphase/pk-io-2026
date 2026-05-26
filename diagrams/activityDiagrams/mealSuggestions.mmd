@@ -1,0 +1,29 @@
+flowchart TD
+    Start([Start]) --> A["Użytkownik wybiera\n'Generuj propozycje'"]
+    A --> B[Pobierz PantryItem\ndla użytkownika]
+    B --> C{Spiżarnia\nniepusta?}
+    C -- Nie --> Err1[Komunikat:\nuzupełnij spiżarnię]
+    Err1 --> End([Koniec])
+    C -- Tak --> D[Pobierz ACTIVE przepisy\nużytkownika z RecipeIngredient]
+    D --> E{Przynajmniej\n1 przepis?}
+    E -- Nie --> Err2[Komunikat:\ndodaj przepisy]
+    Err2 --> End
+    E -- Tak --> H[Inicjalizuj pustą\nlistę wyników]
+    H --> I[Pobierz następny przepis]
+    I --> J[Normalizuj jednostki\nczłonów RecipeIngredient]
+    J --> K[Porównaj skład przepisu\nze stanem spiżarni]
+    K --> L{Wszystkie wymagane\nskładniki dostępne?}
+    L -- Tak --> M[Dodaj przepis do\nlisty wyników]
+    L -- Nie --> N{Brakuje\n≤ 2 składników?}
+    N -- Tak --> O["Dodaj do listy\n'prawie gotowe'"]
+    N -- Nie --> P[Pomiń przepis]
+    M --> Q{Kolejny\nprzepis?}
+    O --> Q
+    P --> Q
+    Q -- Tak --> I
+    Q -- Nie --> R{Lista wyników\nniepusta?}
+    R -- Nie --> Err3[Komunikat:\nbrak pasujących przepisów]
+    Err3 --> End
+    R -- Tak --> T[Wyświetl propozycje\nposiłków użytkownikowi]
+    T --> U[Użytkownik opcjonalnie\nfiltruje wyniki]
+    U --> End

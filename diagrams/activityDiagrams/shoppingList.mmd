@@ -1,0 +1,26 @@
+flowchart TD
+    Start([Start]) --> A[Użytkownik otwiera\nlistę zakupów]
+    A --> B{Aktywna ShoppingList\nistnieje?}
+    B -- Nie --> C[Utwórz nową\naktywną ShoppingList]
+    C --> D[Wyświetl pustą\nlistę zakupów]
+    B -- Tak --> D2[Wyświetl bieżącą\nlistę zakupów]
+    D --> E[Użytkownik wybiera\nprzepisy do przygotowania]
+    D2 --> E
+    E --> F[Pobierz RecipeIngredient\ndla wybranych przepisów]
+    F --> G[Pobierz PantryItem\nużytkownika]
+    G --> H[Oblicz brakujące składniki:\nskład przepisów − spiżarnia]
+    H --> I{Kolejny brakujący\nskładnik?}
+    I -- Nie --> M[Wyświetl zaktualizowaną\nlistę zakupów]
+    I -- Tak --> J{Pozycja już\nna liście?}
+    J -- Tak --> K[Zsumuj wymagane\nilości]
+    J -- Nie --> L[Dodaj nowy\nShoppingListItem]
+    K --> I
+    L --> I
+    M --> N[Użytkownik przegląda\ni opcjonalnie edytuje listę]
+    N --> O{Użytkownik oznacza\npozycję jako kupioną?}
+    O -- Nie --> End([Koniec])
+    O -- Tak --> P["Ustaw purchased = true\ndla pozycji"]
+    P --> Q{Wszystkie pozycje\noznaczone jako kupione?}
+    Q -- Nie --> O
+    Q -- Tak --> R[Zaproponuj przeniesienie\nkupionych pozycji do spiżarni]
+    R --> End
