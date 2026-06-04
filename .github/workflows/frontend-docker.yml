@@ -1,0 +1,72 @@
+name: 🛥️ FE CD - Build and Push Docker Image
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [main]
+    paths:
+      - "smartrecipe/frontend/**"
+      - ".github/workflows/frontend-docker.yml"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/smartrecipe-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine image tag
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          else
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            VERSION="main-${SHORT_SHA}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Using image tag: ${VERSION}"
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=${{ steps.vars.outputs.version }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.version=${{ steps.vars.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ github.event.release.published_at || github.event.head_commit.timestamp }}
+            org.opencontainers.image.documentation=${{ github.event.repository.html_url }}/blob/main/smartrecipe/frontend/README.md
+            org.opencontainers.image.description=${{ github.event.release.name || 'Build from main branch' }}
+            org.opencontainers.image.release-notes=${{ github.event.release.body || 'Development build from main branch.' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: smartrecipe/frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL || 'http://localhost:3000' }}

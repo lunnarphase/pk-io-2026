@@ -9,6 +9,7 @@ import { UnitNormalizationService } from '../shared/unit-normalization.service';
 export interface SuggestionResult {
   available: Recipe[];
   almostAvailable: { recipe: Recipe; missingCount: number }[];
+  needsMore: { recipe: Recipe; missingCount: number }[];
 }
 
 @Injectable()
@@ -53,6 +54,7 @@ export class SuggestionsService {
 
     const available: Recipe[] = [];
     const almostAvailable: { recipe: Recipe; missingCount: number }[] = [];
+    const needsMore: { recipe: Recipe; missingCount: number }[] = [];
 
     for (const recipe of recipes) {
       const missingCount = this.countMissing(
@@ -64,12 +66,15 @@ export class SuggestionsService {
         available.push(recipe);
       } else if (missingCount <= 2) {
         almostAvailable.push({ recipe, missingCount });
+      } else {
+        needsMore.push({ recipe, missingCount });
       }
     }
 
     almostAvailable.sort((a, b) => a.missingCount - b.missingCount);
+    needsMore.sort((a, b) => b.missingCount - a.missingCount);
 
-    return { available, almostAvailable };
+    return { available, almostAvailable, needsMore };
   }
 
   private countMissing(

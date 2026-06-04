@@ -19,6 +19,7 @@ import { CurrentUser } from '../shared/current-user.decorator';
 import { RecipesService } from './recipes.service';
 import {
   CreateRecipeDto,
+  EstimateRecipeKcalDto,
   RecipeFilterDto,
   SetIngredientsDto,
   UpdateRecipeDto,
@@ -61,6 +62,20 @@ export class RecipesController {
     @Body() dto: UpdateRecipeDto,
   ) {
     return this.service.update(userId, id, dto);
+  }
+
+  @Post(':id/estimate-kcal')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Szacuj kcal/porcja ze składu (tylko szkic; wymaga kcal/100g i jednostek g/ml)',
+  })
+  estimateKcal(
+    @CurrentUser() userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EstimateRecipeKcalDto,
+  ) {
+    return this.service.estimateKcal(userId, id, dto);
   }
 
   @Put(':id/ingredients')
@@ -111,6 +126,15 @@ export class RecipesController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.service.transition(userId, id, RecipeLifecycleStatus.DRAFT);
+  }
+
+  @Post(':id/cook')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Oznacz jako ugotowany - odejmij składniki przepisu ze spiżarni',
+  })
+  cook(@CurrentUser() userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.service.cookRecipe(userId, id);
   }
 
   @Delete(':id')

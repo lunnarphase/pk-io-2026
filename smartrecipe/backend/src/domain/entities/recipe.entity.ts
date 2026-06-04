@@ -25,6 +25,9 @@ export class Recipe {
   @Column({ type: 'int', nullable: true, default: null })
   estimatedKcalPerServing: number | null;
 
+  @Column({ type: 'int', nullable: true, default: null })
+  servings: number | null;
+
   @Column({
     type: 'enum',
     enum: RecipeLifecycleStatus,

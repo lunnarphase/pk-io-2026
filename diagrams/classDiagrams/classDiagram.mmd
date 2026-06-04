@@ -10,6 +10,7 @@ classDiagram
         +UUID id
         +String title
         +String instructions
+        +Integer servings
         +Integer estimatedKcalPerServing
         +RecipeLifecycleStatus lifecycleStatus
         +DietType dietType
@@ -20,6 +21,19 @@ classDiagram
         +UUID id
         +String name
         +String externalFoodId
+        +Decimal kcalPer100g
+        +Decimal gramsPerPiece
+    }
+
+    class DeeplTranslationService {
+        <<service>>
+        +translatePlToEn(String text) String
+    }
+
+    class NutritionService {
+        <<service>>
+        +searchFoods(String query) List~Hit~
+        +enrichIngredient(UUID id) Ingredient
     }
 
     class RecipeIngredient {
@@ -79,6 +93,7 @@ classDiagram
         +createDraft(UUID userId) Recipe
         +updateRecipe(UUID recipeId, metadata) void
         +setIngredients(UUID recipeId, lines) void
+        +estimateKcal(UUID recipeId, servings, lines) Integer
         +publish(UUID recipeId) void
         +archive(UUID recipeId) void
         +deleteRecipe(UUID recipeId) void
@@ -137,3 +152,7 @@ classDiagram
     PantryService ..> User : wlasciciel
     PantryService ..> PantryItem : zapis
     PantryService ..> Ingredient : rozpoznanie
+
+    NutritionService ..> DeeplTranslationService : tlumaczenie
+    NutritionService ..> Ingredient : zapis_kaloryki
+    RecipeManagementService ..> NutritionService : wzbogacanie_skladu

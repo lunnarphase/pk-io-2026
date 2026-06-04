@@ -1,0 +1,32 @@
+sequenceDiagram
+    actor U as Użytkownik
+    participant SPA as Aplikacja webowa
+    participant API as Backend API
+    participant NS as NutritionService
+    participant DeepL as DeepL API
+    participant USDA as USDA FDC API
+    participant DB as Baza danych
+
+    U->>SPA: Pobierz kalorykę / wyszukaj składnik
+    SPA->>API: GET /nutrition/search?q=...
+    API->>NS: searchFoods(query)
+    NS->>DeepL: POST /v2/translate (PL→EN)
+    alt DeepL OK
+        DeepL-->>NS: np. "wheat flour"
+    else brak klucza / błąd
+        NS->>NS: fallback: polska nazwa
+    end
+    NS->>USDA: GET /foods/search?q=...
+    USDA-->>NS: lista FDC
+    NS-->>API: wyniki (fdcId, kcal/100g)
+    API-->>SPA: 200 OK
+
+    U->>SPA: Zapisz / auto-enrich
+    SPA->>API: POST /nutrition/enrich/:id
+    API->>NS: enrichIngredient(id)
+    NS->>USDA: GET /food/{fdcId}
+    USDA-->>NS: kcal, foodPortions
+    NS->>DB: zapisz kcalPer100g, gramsPerPiece, externalFoodId
+    DB-->>NS: Ingredient
+    NS-->>API: Ingredient
+    API-->>SPA: 200 OK

@@ -20,6 +20,7 @@ export class RecipeIngredientLineDto {
   ingredientId: string;
 
   @ApiProperty({ example: 400 })
+  @Type(() => Number)
   @IsPositive()
   quantity: number;
 
@@ -46,6 +47,13 @@ export class CreateRecipeDto {
   @Min(1)
   estimatedKcalPerServing?: number;
 
+  @ApiPropertyOptional({ example: 4, description: 'Liczba porcji w przepisie' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  servings?: number;
+
   @ApiPropertyOptional({ enum: DietType })
   @IsOptional()
   @IsEnum(DietType)
@@ -65,6 +73,30 @@ export class SetIngredientsDto {
   @ValidateNested({ each: true })
   @Type(() => RecipeIngredientLineDto)
   ingredients: RecipeIngredientLineDto[];
+}
+
+export class EstimateRecipeKcalDto {
+  @ApiPropertyOptional({
+    example: 4,
+    description:
+      'Liczba porcji - kcal całego przepisu zostanie podzielone przez tę wartość',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  servings?: number;
+
+  @ApiPropertyOptional({
+    type: [RecipeIngredientLineDto],
+    description:
+      'Aktualny skład z edytora (jeśli brak - używany zapisany skład z bazy)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RecipeIngredientLineDto)
+  ingredients?: RecipeIngredientLineDto[];
 }
 
 export class RecipeFilterDto {

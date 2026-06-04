@@ -1,5 +1,5 @@
 C4Container
-    title Diagram kontenerów — SmartRecipe
+    title Diagram kontenerów - SmartRecipe
 
     Person(homecook, "Użytkownik", "Domowy kucharz.")
 
@@ -9,13 +9,15 @@ C4Container
         ContainerDb(db, "Baza danych", "relacyjna - PostgreSQL", "Przepisy, składniki, spiżarnia,<br/>listy zakupów, konta użytkowników")
     }
 
-    System_Ext(nutrition_api, "Zewnętrzne API - żywność", "Kalorie i dane składników")
+    System_Ext(nutrition_api, "Zewnętrzne API - żywność", "USDA FDC: kalorie i porcje")
+    System_Ext(deepl_api, "DeepL API", "Tłumaczenie PL→EN nazw składników")
     System_Ext(recipe_api, "Zewnętrzne API - przepisy", "Wyszukiwarka przepisów")
 
 
     Rel(homecook, web, "HTTPS<br/>korzysta z aplikacji")
     Rel(web, api, "JSON / HTTPS<br/>wywołania API")
     Rel(api, db, "SQL<br/>odczyt i zapis")
+    Rel(api, deepl_api, "HTTPS / REST<br/>tłumaczenie")
     Rel(api, nutrition_api, "HTTPS / REST<br/>kalorie")
     Rel(api, recipe_api, "HTTPS / REST<br/>wyszukiwanie przepisów")
 
@@ -23,5 +25,6 @@ C4Container
     UpdateRelStyle(homecook, web, $offsetY="-24")
     UpdateRelStyle(web, api, $offsetY="-24")
     UpdateRelStyle(api, db, $offsetY="-24")
+    UpdateRelStyle(api, deepl_api, $offsetX="-28", $offsetY="24")
     UpdateRelStyle(api, nutrition_api, $offsetX="-56", $offsetY="-16")
     UpdateRelStyle(api, recipe_api, $offsetX="56", $offsetY="-16")

@@ -73,6 +73,8 @@ describe('SuggestionsService', () => {
     const result = await service.suggestRecipes(USER_ID);
     expect(result.available).toHaveLength(0);
     expect(result.almostAvailable).toHaveLength(0);
+    expect(result.needsMore).toHaveLength(1);
+    expect(result.needsMore[0].missingCount).toBe(3);
   });
 
   // ── empty pantry + 1 ingredient → almostAvailable ─────────────────────
@@ -162,8 +164,8 @@ describe('SuggestionsService', () => {
     expect(result.almostAvailable[0].missingCount).toBe(2);
   });
 
-  // ── 3 missing → excluded from results ────────────────────────────────
-  it('excludes recipe when more than 2 ingredients are missing', async () => {
+  // ── 3+ missing → needsMore ───────────────────────────────────────────
+  it('puts recipe in needsMore when more than 2 ingredients are missing', async () => {
     mockPantryRepo.find.mockResolvedValue([]);
     mockRecipeRepo.createQueryBuilder.mockReturnValue(
       buildQbMock([
@@ -177,6 +179,30 @@ describe('SuggestionsService', () => {
     const result = await service.suggestRecipes(USER_ID);
     expect(result.available).toHaveLength(0);
     expect(result.almostAvailable).toHaveLength(0);
+    expect(result.needsMore).toHaveLength(1);
+    expect(result.needsMore[0].missingCount).toBe(3);
+  });
+
+  it('sorts needsMore by missingCount descending', async () => {
+    mockPantryRepo.find.mockResolvedValue([]);
+    mockRecipeRepo.createQueryBuilder.mockReturnValue(
+      buildQbMock([
+        makeRecipe('three-missing', [
+          { ingredientId: 'ing-a', quantity: 1, unit: 'szt' },
+          { ingredientId: 'ing-b', quantity: 1, unit: 'szt' },
+          { ingredientId: 'ing-c', quantity: 1, unit: 'szt' },
+        ]),
+        makeRecipe('four-missing', [
+          { ingredientId: 'ing-a', quantity: 1, unit: 'szt' },
+          { ingredientId: 'ing-b', quantity: 1, unit: 'szt' },
+          { ingredientId: 'ing-c', quantity: 1, unit: 'szt' },
+          { ingredientId: 'ing-d', quantity: 1, unit: 'szt' },
+        ]),
+      ]),
+    );
+    const result = await service.suggestRecipes(USER_ID);
+    expect(result.needsMore[0].recipe.id).toBe('four-missing');
+    expect(result.needsMore[1].recipe.id).toBe('three-missing');
   });
 
   // ── multiple recipes sorted by missing count ──────────────────────────
@@ -220,5 +246,6 @@ describe('SuggestionsService', () => {
     const result = await service.suggestRecipes(USER_ID);
     expect(result.available).toHaveLength(0);
     expect(result.almostAvailable).toHaveLength(0);
+    expect(result.needsMore).toHaveLength(0);
   });
 });

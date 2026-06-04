@@ -18,7 +18,7 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('SmartRecipe API')
-    .setDescription('System zarządzania przepisami kulinarnymi — REST API')
+    .setDescription('System zarządzania przepisami kulinarnymi - REST API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

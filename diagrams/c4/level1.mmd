@@ -1,16 +1,19 @@
 C4Context
-    title Diagram kontekstu — SmartRecipe
+    title Diagram kontekstu - SmartRecipe
 
     Person(homecook, "Użytkownik", "Domowy kucharz.<br/>Własna baza przepisów i spiżarnia.<br/>Plan posiłków oraz zakupy.")
     System(smartrecipe, "SmartRecipe", "Aplikacja webowa.<br/>Baza przepisów i wirtualna spiżarnia.<br/>Filtrowanie dań.<br/>Propozycje posiłków z posiadanych składników.")
-    System_Ext(nutrition_api, "Zewnętrzne API - żywność", "Kalorie i dane składników")
+    System_Ext(nutrition_api, "Zewnętrzne API - żywność", "USDA FDC: kalorie i porcje")
+    System_Ext(deepl_api, "DeepL API", "Tłumaczenie PL→EN nazw składników")
     System_Ext(recipe_api, "Zewnętrzne API - przepisy", "Wyszukiwarka przepisów")
 
     Rel(homecook, smartrecipe, "przeglądarka")
+    Rel(smartrecipe, deepl_api, "REST: tłumaczenie nazw")
     Rel(smartrecipe, nutrition_api, "REST: kalorie składników")
     Rel(smartrecipe, recipe_api, "REST: wyszukiwarka przepisów")
 
     UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
     UpdateRelStyle(homecook, smartrecipe, $offsetY="-40")
+    UpdateRelStyle(smartrecipe, deepl_api, $offsetX="-40", $offsetY="20")
     UpdateRelStyle(smartrecipe, nutrition_api, $offsetX="-80", $offsetY="-12")
     UpdateRelStyle(smartrecipe, recipe_api, $offsetX="80", $offsetY="-12")

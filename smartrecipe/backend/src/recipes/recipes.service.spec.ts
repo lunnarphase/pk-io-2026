@@ -6,8 +6,11 @@ import {
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RecipesService } from './recipes.service';
+import { PantryService } from '../pantry/pantry.service';
+import { UnitNormalizationService } from '../shared/unit-normalization.service';
 import { Recipe } from '../domain/entities/recipe.entity';
 import { RecipeIngredient } from '../domain/entities/recipe-ingredient.entity';
+import { Ingredient } from '../domain/entities/ingredient.entity';
 import { RecipeLifecycleStatus } from '../domain/enums';
 
 const OWNER_ID = 'owner-uuid';
@@ -19,6 +22,7 @@ const makeRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
   title: 'Test Recipe',
   instructions: null,
   estimatedKcalPerServing: null,
+  servings: null,
   lifecycleStatus: RecipeLifecycleStatus.DRAFT,
   dietType: null,
   cuisineType: null,
@@ -38,6 +42,10 @@ const mockRecipeRepo = {
   remove: jest.fn(),
 };
 
+const mockIngredientRepo = {
+  findBy: jest.fn().mockResolvedValue([]),
+};
+
 const mockRiRepo = {
   delete: jest.fn(),
   create: jest.fn(
@@ -45,6 +53,13 @@ const mockRiRepo = {
   ),
   save: jest.fn((items: RecipeIngredient[]) => Promise.resolve(items)),
   count: jest.fn(),
+};
+
+const mockPantryService = {
+  listPantry: jest.fn().mockResolvedValue([]),
+  countMissingIngredients: jest.fn().mockReturnValue(0),
+  computeIngredientPantryMatches: jest.fn().mockReturnValue([]),
+  consumeIngredients: jest.fn().mockResolvedValue([]),
 };
 
 describe('RecipesService', () => {
@@ -57,6 +72,12 @@ describe('RecipesService', () => {
         RecipesService,
         { provide: getRepositoryToken(Recipe), useValue: mockRecipeRepo },
         { provide: getRepositoryToken(RecipeIngredient), useValue: mockRiRepo },
+        {
+          provide: getRepositoryToken(Ingredient),
+          useValue: mockIngredientRepo,
+        },
+        { provide: PantryService, useValue: mockPantryService },
+        UnitNormalizationService,
       ],
     }).compile();
     service = module.get(RecipesService);

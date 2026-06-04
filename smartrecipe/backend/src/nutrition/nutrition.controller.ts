@@ -29,9 +29,9 @@ export class NutritionController {
   @ApiOperation({
     summary: 'Szukaj składników w USDA FoodData Central',
     description:
-      'Zwraca listę wyników z bazy USDA FDC — fdcId, opis i kcal/100 g. ' +
-      'Używa DEMO_KEY gdy brak NUTRITION_API_KEY (30 req/godz). ' +
-      'Klucz darmowy: https://api.data.gov/signup/',
+      'Zwraca listę wyników z bazy USDA FDC - fdcId, opis i kcal/100 g. ' +
+      'Polskie zapytania są tłumaczone przez DeepL (DEEPL_API_KEY). ' +
+      'USDA: DEMO_KEY gdy brak NUTRITION_API_KEY (30 req/godz).',
   })
   @ApiQuery({
     name: 'q',
@@ -52,7 +52,7 @@ export class NutritionController {
       'Automatycznie pobierz i zapisz dane kaloryczne składnika (najlepszy wynik USDA)',
     description:
       'Wyszukuje nazwę składnika w USDA FDC, bierze pierwszy wynik i zapisuje ' +
-      'externalFoodId (fdcId) oraz kcalPer100g w bazie danych.',
+      'externalFoodId (fdcId), kcalPer100g oraz opcjonalnie gramsPerPiece (waga 1 szt z USDA) w bazie.',
   })
   enrichAuto(@Param('ingredientId', ParseUUIDPipe) ingredientId: string) {
     return this.service.enrichIngredient(ingredientId);

@@ -4,6 +4,7 @@ import { ShoppingList } from '../domain/entities/shopping-list.entity';
 import { ShoppingListItem } from '../domain/entities/shopping-list-item.entity';
 import { RecipeIngredient } from '../domain/entities/recipe-ingredient.entity';
 import { PantryItem } from '../domain/entities/pantry-item.entity';
+import { PantryModule } from '../pantry/pantry.module';
 import { ShoppingListService } from './shopping-list.service';
 import { ShoppingListController } from './shopping-list.controller';
 
@@ -15,6 +16,7 @@ import { ShoppingListController } from './shopping-list.controller';
       RecipeIngredient,
       PantryItem,
     ]),
+    PantryModule,
   ],
   providers: [ShoppingListService],
   controllers: [ShoppingListController],

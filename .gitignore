@@ -4,5 +4,7 @@ node_modules/**
 dist/**
 dist
 .DS_STORE
-.pnpm_store
-.pnpm_store/**
+.pnpm-store
+.pnpm-store/**
+FRONTEND_PLAN.md
+coverage

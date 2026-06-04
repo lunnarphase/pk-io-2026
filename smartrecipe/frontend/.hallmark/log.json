@@ -1,0 +1,98 @@
+[
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Index-First",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · external recipes import page redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Catalogue",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · shopping list redesign + checkbox adds to pantry"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "n/a",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "component-nav",
+    "nav": "N6 Masthead + N3 mobile drawer",
+    "brief": "SmartRecipe · app navbar editorial match + mobile sidebar"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Long Document",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · active recipe read-only detail + shopping list CTA"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Workbench",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · draft recipe detail page redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "n/a",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "component",
+    "brief": "SmartRecipe · ingredient list - table-row redesign (layout stability)"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Split Studio",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · new recipe form redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Portfolio Grid",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · recipes page redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Index-First",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · pantry page redesign v2 (shelf empty, header action)"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Catalogue",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · pantry page redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Workbench",
+    "theme": "Garden",
+    "enrichment": "none",
+    "scope": "single-page-redesign",
+    "brief": "SmartRecipe · suggestions page redesign"
+  },
+  {
+    "date": "2026-06-04",
+    "macrostructure": "Narrative Workflow",
+    "theme": "Garden",
+    "enrichment": "E5 hand-built SVG",
+    "brief": "SmartRecipe · landing page port"
+  }
+]

@@ -14,8 +14,32 @@ export class Ingredient {
   @Column({ type: 'varchar', nullable: true })
   externalFoodId: string | null;
 
-  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 8,
+    scale: 2,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) =>
+        value == null ? null : Number.parseFloat(value),
+    },
+  })
   kcalPer100g: number | null;
+
+  /** Default grams for 1 szt from USDA FDC portions / serving (auto, no user pick). */
+  @Column({
+    type: 'decimal',
+    precision: 8,
+    scale: 2,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) =>
+        value == null ? null : Number.parseFloat(value),
+    },
+  })
+  gramsPerPiece: number | null;
 
   @OneToMany(() => RecipeIngredient, (ri) => ri.ingredient)
   recipeIngredients: RecipeIngredient[];

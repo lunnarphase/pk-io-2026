@@ -2,6 +2,7 @@ graph LR
     User(("A01\nUżytkownik"))
     NutAPI(["A02\nZewnętrzne API\nŻywność"])
     RecAPI(["A03\nZewnętrzne API\nPrzepisy"])
+    DeeplAPI(["A04\nDeepL API\nTłumaczenie"])
 
     subgraph sys["System SmartRecipe"]
         UC01("UC01\nZarządzanie przepisami")
@@ -16,6 +17,8 @@ graph LR
     User --- UC03
     User --- UC04
     User --- UC05
+    UC01 -. "<<uses>>" .-> DeeplAPI
+    UC01 -. "<<uses>>" .-> NutAPI
     UC03 -. "<<uses>>" .-> NutAPI
     UC05 -. "<<uses>>" .-> RecAPI
     UC04 -. "<<extend>>" .-> UC02

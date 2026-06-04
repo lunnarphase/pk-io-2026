@@ -6,6 +6,7 @@ import { ShoppingList } from '../domain/entities/shopping-list.entity';
 import { ShoppingListItem } from '../domain/entities/shopping-list-item.entity';
 import { RecipeIngredient } from '../domain/entities/recipe-ingredient.entity';
 import { PantryItem } from '../domain/entities/pantry-item.entity';
+import { PantryService } from '../pantry/pantry.service';
 import { UnitNormalizationService } from '../shared/unit-normalization.service';
 
 const USER_ID = 'user-uuid';
@@ -37,6 +38,7 @@ const mockListRepo = {
 
 const mockItemRepo = {
   findOne: jest.fn(),
+  find: jest.fn(),
   create: jest.fn(
     (dto: Partial<ShoppingListItem>) => ({ ...dto }) as ShoppingListItem,
   ),
@@ -46,6 +48,7 @@ const mockItemRepo = {
 
 const mockRiRepo = { find: jest.fn() };
 const mockPantryRepo = { find: jest.fn() };
+const mockPantryService = { upsertItem: jest.fn().mockResolvedValue({}) };
 
 describe('ShoppingListService', () => {
   let service: ShoppingListService;
@@ -75,6 +78,7 @@ describe('ShoppingListService', () => {
         },
         { provide: getRepositoryToken(RecipeIngredient), useValue: mockRiRepo },
         { provide: getRepositoryToken(PantryItem), useValue: mockPantryRepo },
+        { provide: PantryService, useValue: mockPantryService },
       ],
     }).compile();
     service = module.get(ShoppingListService);
@@ -226,13 +230,36 @@ describe('ShoppingListService', () => {
 
   // ── patchItem ─────────────────────────────────────────────────────────
   describe('patchItem', () => {
-    it('marks item as purchased', async () => {
-      const item = { id: 'i1', shoppingListId: LIST_ID, purchased: false };
+    it('marks item as purchased without touching pantry', async () => {
+      const item = {
+        id: 'i1',
+        shoppingListId: LIST_ID,
+        ingredientId: 'ing-a',
+        quantityNeeded: 2,
+        unit: 'szt',
+        purchased: false,
+      };
       mockListRepo.findOne.mockResolvedValue(makeList());
       mockItemRepo.findOne.mockResolvedValue(item);
       await service.patchItem(USER_ID, 'i1', { purchased: true });
+      expect(mockPantryService.upsertItem).not.toHaveBeenCalled();
       expect(item.purchased).toBe(true);
       expect(mockItemRepo.save).toHaveBeenCalled();
+    });
+
+    it('does not add to pantry when unmarking purchased', async () => {
+      const item = {
+        id: 'i1',
+        shoppingListId: LIST_ID,
+        ingredientId: 'ing-a',
+        quantityNeeded: 2,
+        unit: 'szt',
+        purchased: true,
+      };
+      mockListRepo.findOne.mockResolvedValue(makeList());
+      mockItemRepo.findOne.mockResolvedValue(item);
+      await service.patchItem(USER_ID, 'i1', { purchased: false });
+      expect(mockPantryService.upsertItem).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException for item not on this list', async () => {
@@ -241,6 +268,72 @@ describe('ShoppingListService', () => {
       await expect(
         service.patchItem(USER_ID, 'bad-id', { purchased: true }),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('syncPurchasedToPantry', () => {
+    it('adds purchased items to pantry and removes them from the list', async () => {
+      const purchased = [
+        {
+          id: 'i1',
+          shoppingListId: LIST_ID,
+          ingredientId: 'ing-a',
+          quantityNeeded: 2,
+          unit: 'szt',
+          purchased: true,
+        },
+        {
+          id: 'i2',
+          shoppingListId: LIST_ID,
+          ingredientId: 'ing-b',
+          quantityNeeded: 1,
+          unit: 'kg',
+          purchased: true,
+        },
+      ];
+      mockListRepo.findOne.mockResolvedValue(makeList());
+      mockItemRepo.find.mockResolvedValue(purchased);
+      mockListRepo.findOne
+        .mockResolvedValueOnce(makeList())
+        .mockResolvedValueOnce(makeList([{ id: 'i3', purchased: false }]));
+
+      await service.syncPurchasedToPantry(USER_ID);
+
+      expect(mockPantryService.upsertItem).toHaveBeenCalledTimes(2);
+      expect(mockPantryService.upsertItem).toHaveBeenCalledWith(
+        USER_ID,
+        'ing-a',
+        { quantity: 2, unit: 'szt', mode: 'add' },
+      );
+      expect(mockItemRepo.remove).toHaveBeenCalledWith(purchased);
+    });
+
+    it('is a no-op when nothing is purchased', async () => {
+      mockListRepo.findOne.mockResolvedValue(makeList());
+      mockItemRepo.find.mockResolvedValue([]);
+      await service.syncPurchasedToPantry(USER_ID);
+      expect(mockPantryService.upsertItem).not.toHaveBeenCalled();
+      expect(mockItemRepo.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('clearAllItems', () => {
+    it('removes every item on the active list', async () => {
+      const items = [
+        { id: 'i1', shoppingListId: LIST_ID },
+        { id: 'i2', shoppingListId: LIST_ID },
+      ];
+      mockListRepo.findOne.mockResolvedValue(makeList());
+      mockItemRepo.find.mockResolvedValue(items);
+      await service.clearAllItems(USER_ID);
+      expect(mockItemRepo.remove).toHaveBeenCalledWith(items);
+    });
+
+    it('does not call remove when list is empty', async () => {
+      mockListRepo.findOne.mockResolvedValue(makeList());
+      mockItemRepo.find.mockResolvedValue([]);
+      await service.clearAllItems(USER_ID);
+      expect(mockItemRepo.remove).not.toHaveBeenCalled();
     });
   });
 });

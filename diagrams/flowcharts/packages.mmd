@@ -9,6 +9,7 @@ flowchart TB
         shoppingSvc[ShoppingListService]
         pantrySvc[PantryService]
         sugg[MealSuggestionService]
+        nutritionSvc[NutritionService]
     end
 
     subgraph domain["domain"]
@@ -17,6 +18,7 @@ flowchart TB
 
     subgraph infrastructure["infrastructure"]
         repos[SqlRepositories]
+        deepl[DeeplTranslationClient]
         nut[NutritionApiClient]
         recsearch[RecipeSearchApiClient]
     end
@@ -26,6 +28,7 @@ flowchart TB
     rest --> shoppingSvc
     rest --> pantrySvc
     rest --> sugg
+    rest --> nutritionSvc
     recipeSvc --> domain
     shoppingSvc --> domain
     pantrySvc --> domain
@@ -36,6 +39,11 @@ flowchart TB
     pantrySvc --> repos
     sugg --> nut
     sugg --> recsearch
+    nutritionSvc --> deepl
+    nutritionSvc --> nut
+    nutritionSvc --> domain
+    recipeSvc --> nutritionSvc
     repos --> domain
+    deepl --> domain
     nut --> domain
     recsearch --> domain

@@ -8,18 +8,20 @@ Dokument uzupełnia [model opisowy i diagramy C4](docs.md) o artefakty UML: anal
 
 Model statyczny precyzuje strukturę danych i podział odpowiedzialności między warstwami aplikacji tak, aby realizowały założenia z dokumentacji wstępnej. Poniższa tabela wiąże **fragmenty modelu opisowego** (wymagania słowne) z **elementami modelu statycznego** (klasy, pakiety, komponenty), które pojawiają się na diagramach w kolejnych podrozdziałach.
 
-| Fragment modelu opisowego                                  | Odwzorowanie w modelu statycznym                                                                                                                               |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Własne przepisy z listą składników i ilościami             | Klasy `Recipe`, `Ingredient`, `RecipeIngredient` (ilość, jednostka); powiązania jeden do wielu między przepisem a wierszami składowymi                         |
-| Filtry: typ kuchni, kaloryczność, rodzaj diety             | Atrybuty / wartości w `Recipe` (np. szacowana kaloryczność, `DietType`, `CuisineType`); reguły filtrowania w warstwie aplikacji                                |
-| Wirtualna spiżarnia i lista zakupów                        | `PantryItem` (co użytkownik ma w domu), `ShoppingList` oraz `ShoppingListItem` (braki i zakupy)                                                                |
-| Integracja: kalorie składników, wyszukiwarka przepisów     | Pakiet `infrastructure`, komponenty `NutritionApiClient`, `RecipeSearchApiClient`                                                                              |
-| Generowanie propozycji posiłków z posiadanych składników   | `MealSuggestionService` w warstwie `application` — operacja `suggestRecipes` na bazie przepisów użytkownika i stanu spiżarni                                   |
-| Dodawanie i edycja własnych przepisów (szkic → publikacja) | `RecipeManagementService` — tworzenie szkicu, skład, metadane, publikacja / archiwizacja / usuwanie; użytkownik operuje przez API, nie bezpośrednio na encjach |
-| Lista zakupów i uzupełnianie jej wg wybranych przepisów    | `ShoppingListService` — aktywna lista, scalanie braków ze składu wielu `Recipe`, odjęcie tego co jest w `PantryItem`, oznaczanie zakupu                        |
-| Prowadzenie wirtualnej spiżarni                            | `PantryService` — dodawanie / korekta ilości / usunięcie pozycji spiżarni powiązanych ze `Ingredient`                                                          |
+| Fragment modelu opisowego                                  | Odwzorowanie w modelu statycznym                                                                                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Własne przepisy z listą składników i ilościami             | Klasy `Recipe`, `Ingredient`, `RecipeIngredient` (ilość, jednostka); powiązania jeden do wielu między przepisem a wierszami składowymi                           |
+| Filtry: typ kuchni, kaloryczność, rodzaj diety             | Atrybuty / wartości w `Recipe` (np. `servings`, szacowana kaloryczność na porcję, `DietType`, `CuisineType`); reguły filtrowania w warstwie aplikacji            |
+| Wirtualna spiżarnia i lista zakupów                        | `PantryItem` (co użytkownik ma w domu), `ShoppingList` oraz `ShoppingListItem` (braki i zakupy)                                                                  |
+| Integracja: kalorie składników, wyszukiwarka przepisów     | Pakiet `infrastructure`: `DeeplTranslationClient` (PL→EN nazw składników), `NutritionApiClient` (USDA FDC: kcal/100 g, `gramsPerPiece`), `RecipeSearchApiClient` |
+| Tłumaczenie przed wyszukiwaniem USDA                       | `NutritionService` wywołuje DeepL, potem USDA FDC po angielskiej frazie; bez klucza DeepL - fallback na polską nazwę                                             |
+| Szacowanie kcal przepisu w szkicu                          | `RecipeManagementService.estimateKcal` - suma składników (g/ml/szt z `gramsPerPiece`) ÷ `servings` → `estimatedKcalPerServing` (tylko `DRAFT`)                   |
+| Generowanie propozycji posiłków z posiadanych składników   | `MealSuggestionService` w warstwie `application` - operacja `suggestRecipes` na bazie przepisów użytkownika i stanu spiżarni                                     |
+| Dodawanie i edycja własnych przepisów (szkic → publikacja) | `RecipeManagementService` - tworzenie szkicu, skład, metadane, publikacja / archiwizacja / usuwanie; użytkownik operuje przez API, nie bezpośrednio na encjach   |
+| Lista zakupów i uzupełnianie jej wg wybranych przepisów    | `ShoppingListService` - aktywna lista, scalanie braków ze składu wielu `Recipe`, odjęcie tego co jest w `PantryItem`, oznaczanie zakupu                          |
+| Prowadzenie wirtualnej spiżarni                            | `PantryService` - dodawanie / korekta ilości / usunięcie pozycji spiżarni powiązanych ze `Ingredient`                                                            |
 
-Diagramy C4 (kontekst i kontenery) pokazują **wdrożenie**; niniejszy model statyczny koncentruje się na **logice domenowej, API i integracjach** zgodnie z typową architekturą warstwową. **Encje domenowe** nie są modyfikowane „z UI” wprost — warstwa aplikacji (**serwisy / przypadki użycia**) orkiestruje walidację, trwałość i reguły (np. tylko właściciel może edytować swój przepis).
+Diagramy C4 (kontekst i kontenery) pokazują **wdrożenie**; niniejszy model statyczny koncentruje się na **logice domenowej, API i integracjach** zgodnie z typową architekturą warstwową. **Encje domenowe** nie są modyfikowane „z UI” wprost - warstwa aplikacji (**serwisy / przypadki użycia**) orkiestruje walidację, trwałość i reguły (np. tylko właściciel może edytować swój przepis).
 
 ---
 
@@ -42,6 +44,7 @@ classDiagram
         +UUID id
         +String title
         +String instructions
+        +Integer servings
         +Integer estimatedKcalPerServing
         +RecipeLifecycleStatus lifecycleStatus
         +DietType dietType
@@ -52,6 +55,19 @@ classDiagram
         +UUID id
         +String name
         +String externalFoodId
+        +Decimal kcalPer100g
+        +Decimal gramsPerPiece
+    }
+
+    class DeeplTranslationService {
+        <<service>>
+        +translatePlToEn(String text) String
+    }
+
+    class NutritionService {
+        <<service>>
+        +searchFoods(String query) List~Hit~
+        +enrichIngredient(UUID id) Ingredient
     }
 
     class RecipeIngredient {
@@ -111,6 +127,7 @@ classDiagram
         +createDraft(UUID userId) Recipe
         +updateRecipe(UUID recipeId, metadata) void
         +setIngredients(UUID recipeId, lines) void
+        +estimateKcal(UUID recipeId, servings, lines) Integer
         +publish(UUID recipeId) void
         +archive(UUID recipeId) void
         +deleteRecipe(UUID recipeId) void
@@ -169,13 +186,17 @@ classDiagram
     PantryService ..> User : wlasciciel
     PantryService ..> PantryItem : zapis
     PantryService ..> Ingredient : rozpoznanie
+
+    NutritionService ..> DeeplTranslationService : tlumaczenie
+    NutritionService ..> Ingredient : zapis_kaloryki
+    RecipeManagementService ..> NutritionService : wzbogacanie_skladu
 ```
 
 ---
 
 ## Diagram obiektów (snapshot)
 
-**Cel:** pokazać **konkretną chwilę** w działaniu systemu — instancje i linki, a nie typy. Uzupełnia diagram klas i ułatwia sprawdzenie, czy multiplicities mają sens w przykładowym scenariuszu.
+**Cel:** pokazać **konkretną chwilę** w działaniu systemu - instancje i linki, a nie typy. Uzupełnia diagram klas i ułatwia sprawdzenie, czy multiplicities mają sens w przykładowym scenariuszu.
 
 **Ograniczenia:** Mermaid nie ma pełnej notacji UML „obiektowej”; użyto klas ze stereotypem `<<object>>` oraz przykładowych wartości atrybutów.
 
@@ -191,6 +212,7 @@ classDiagram
     class PestoPasta {
         <<object>>
         +title = "Makaron z pesto"
+        +servings = 4
         +lifecycleStatus = ACTIVE
     }
 
@@ -257,7 +279,7 @@ W tym migawce Anna ma w spiżarni makaron i oliwę w ilościach wystarczających
 
 ## Diagram pakietów
 
-**Cel:** pokazać **warstwy logiczne** zgodne z kontenerami z C4 (SPA, backend, baza), ale w ujęciu pakietów zależności — bez listy wszystkich klas.
+**Cel:** pokazać **warstwy logiczne** zgodne z kontenerami z C4 (SPA, backend, baza), ale w ujęciu pakietów zależności - bez listy wszystkich klas.
 
 **Ograniczenia:** zależność aplikacji od infrastruktury jest często realizowana przez wstrzykiwanie implementacji repozytoriów; na diagramie zaznaczono to jako użycie infrastruktury przez warstwę aplikacji.
 
@@ -281,8 +303,13 @@ flowchart TB
 
     subgraph infrastructure["infrastructure"]
         repos[SqlRepositories]
+        deepl[DeeplTranslationClient]
         nut[NutritionApiClient]
         recsearch[RecipeSearchApiClient]
+    end
+
+    subgraph nutrition["nutrition"]
+        nutritionSvc[NutritionService]
     end
 
     spa -->|JSON_HTTPS| rest
@@ -290,6 +317,7 @@ flowchart TB
     rest --> shoppingSvc
     rest --> pantrySvc
     rest --> sugg
+    rest --> nutritionSvc
     recipeSvc --> domain
     shoppingSvc --> domain
     pantrySvc --> domain
@@ -300,16 +328,21 @@ flowchart TB
     pantrySvc --> repos
     sugg --> nut
     sugg --> recsearch
+    nutritionSvc --> deepl
+    nutritionSvc --> nut
+    nutritionSvc --> domain
+    recipeSvc --> nutritionSvc
     repos --> domain
     nut --> domain
     recsearch --> domain
+    deepl --> domain
 ```
 
 ---
 
 ## Diagram stanu: cykl życia przepisu
 
-**Cel:** opisać stany `Recipe` istotne dla użytkownika tworzącego własną bazę — od szkicu do archiwum.
+**Cel:** opisać stany `Recipe` istotne dla użytkownika tworzącego własną bazę - od szkicu do archiwum.
 
 ```mermaid
 stateDiagram-v2

@@ -49,6 +49,16 @@ export class ShoppingListController {
     return this.service.addManualItem(userId, dto);
   }
 
+  @Post('sync-pantry')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Dodaj wszystkie kupione pozycje do spiżarni i usuń je z listy zakupów',
+  })
+  syncPurchasedToPantry(@CurrentUser() userId: string) {
+    return this.service.syncPurchasedToPantry(userId);
+  }
+
   @Patch('items/:id')
   @ApiOperation({ summary: 'Aktualizuj pozycję (np. oznacz jako kupioną)' })
   patchItem(
@@ -57,6 +67,13 @@ export class ShoppingListController {
     @Body() dto: PatchShoppingListItemDto,
   ) {
     return this.service.patchItem(userId, id, dto);
+  }
+
+  @Delete('items')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Usuń wszystkie pozycje z aktywnej listy zakupów' })
+  clearItems(@CurrentUser() userId: string) {
+    return this.service.clearAllItems(userId);
   }
 
   @Delete('items/:id')

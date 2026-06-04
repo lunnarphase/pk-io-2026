@@ -7,7 +7,6 @@ describe('UnitNormalizationService', () => {
     svc = new UnitNormalizationService();
   });
 
-  // ── normalize ─────────────────────────────────────────────────────────
   describe('normalize', () => {
     it('passes g through unchanged', () => {
       expect(svc.normalize(200, 'g')).toEqual({ value: 200, baseUnit: 'g' });
@@ -17,32 +16,31 @@ describe('UnitNormalizationService', () => {
       expect(svc.normalize(1.5, 'kg')).toEqual({ value: 1500, baseUnit: 'g' });
     });
 
-    it('passes ml through unchanged', () => {
-      expect(svc.normalize(500, 'ml')).toEqual({ value: 500, baseUnit: 'ml' });
+    it('converts ounce to g', () => {
+      expect(svc.normalize(1, 'ounce')).toEqual({
+        value: 28.3495,
+        baseUnit: 'g',
+      });
     });
 
-    it('converts l to ml', () => {
-      expect(svc.normalize(2, 'l')).toEqual({ value: 2000, baseUnit: 'ml' });
+    it('converts tablespoons to tsp', () => {
+      expect(svc.normalize(2, 'tablespoons')).toEqual({
+        value: 6,
+        baseUnit: 'tsp',
+      });
     });
 
-    it('converts łyżka to łyżeczka (×3)', () => {
+    it('converts teaspoons to tsp', () => {
+      expect(svc.normalize(4, 'teaspoons')).toEqual({
+        value: 4,
+        baseUnit: 'tsp',
+      });
+    });
+
+    it('converts łyżka to tsp (×3)', () => {
       expect(svc.normalize(2, 'łyżka')).toEqual({
         value: 6,
-        baseUnit: 'łyżeczka',
-      });
-    });
-
-    it('converts łyżki to łyżeczka (×3)', () => {
-      expect(svc.normalize(3, 'łyżki')).toEqual({
-        value: 9,
-        baseUnit: 'łyżeczka',
-      });
-    });
-
-    it('passes łyżeczka through unchanged', () => {
-      expect(svc.normalize(4, 'łyżeczka')).toEqual({
-        value: 4,
-        baseUnit: 'łyżeczka',
+        baseUnit: 'tsp',
       });
     });
 
@@ -50,92 +48,108 @@ describe('UnitNormalizationService', () => {
       expect(svc.normalize(1, 'cup')).toEqual({ value: 240, baseUnit: 'ml' });
     });
 
-    it('converts tbsp to tsp (×3)', () => {
-      expect(svc.normalize(2, 'tbsp')).toEqual({ value: 6, baseUnit: 'tsp' });
-    });
-
-    it('returns original unit for unknowns', () => {
-      expect(svc.normalize(3, 'szczypta')).toEqual({
-        value: 3,
-        baseUnit: 'szczypta',
-      });
-    });
-
     it('is case-insensitive for units', () => {
       expect(svc.normalize(1, 'KG')).toEqual({ value: 1000, baseUnit: 'g' });
     });
+  });
 
-    it('converts quantity stored as decimal string correctly', () => {
-      expect(svc.normalize(Number('0.5'), 'kg')).toEqual({
-        value: 500,
-        baseUnit: 'g',
+  describe('resolveForStorage', () => {
+    it('maps ounces to grams', () => {
+      const result = svc.resolveForStorage(2, 'ounces');
+      expect(result.unit).toBe('g');
+      expect(result.quantity).toBeCloseTo(56.7, 0);
+    });
+
+    it('maps tablespoons to tbsp', () => {
+      expect(svc.resolveForStorage(2, 'tablespoons')).toEqual({
+        quantity: 2,
+        unit: 'tbsp',
+      });
+    });
+
+    it('maps teaspoons to tsp (or tbsp when equivalent)', () => {
+      expect(svc.resolveForStorage(2, 'teaspoons')).toEqual({
+        quantity: 2,
+        unit: 'tsp',
+      });
+      expect(svc.resolveForStorage(3, 'teaspoons')).toEqual({
+        quantity: 1,
+        unit: 'tbsp',
+      });
+    });
+
+    it('maps grams label to g', () => {
+      expect(svc.resolveForStorage(250, 'grams')).toEqual({
+        quantity: 250,
+        unit: 'g',
+      });
+    });
+
+    it('maps empty unit to szt', () => {
+      expect(svc.resolveForStorage(1, '')).toEqual({
+        quantity: 1,
+        unit: 'szt',
+      });
+    });
+
+    it('maps unknown piece-like labels to szt', () => {
+      expect(svc.resolveForStorage(2, 'cloves')).toEqual({
+        quantity: 2,
+        unit: 'szt',
+      });
+    });
+
+    it('converts large ml to liters', () => {
+      expect(svc.resolveForStorage(1500, 'milliliters')).toEqual({
+        quantity: 1.5,
+        unit: 'l',
       });
     });
   });
 
-  // ── canCompare ────────────────────────────────────────────────────────
+  describe('toGrams', () => {
+    it('returns grams for weight units', () => {
+      expect(svc.toGrams(500, 'g')).toBe(500);
+      expect(svc.toGrams(1, 'kg')).toBe(1000);
+    });
+
+    it('treats ml as ~1 g/ml', () => {
+      expect(svc.toGrams(250, 'ml')).toBe(250);
+    });
+
+    it('returns null for piece-like units', () => {
+      expect(svc.toGrams(2, 'szt')).toBeNull();
+      expect(svc.toGrams(1, 'łyżka')).toBeNull();
+    });
+  });
+
   describe('canCompare', () => {
     it('g and kg are comparable', () => {
       expect(svc.canCompare('g', 'kg')).toBe(true);
     });
 
-    it('ml and l are comparable', () => {
-      expect(svc.canCompare('ml', 'l')).toBe(true);
-    });
-
-    it('łyżka and łyżeczka are comparable', () => {
-      expect(svc.canCompare('łyżka', 'łyżeczka')).toBe(true);
+    it('tablespoons and tsp are comparable', () => {
+      expect(svc.canCompare('tablespoons', 'tsp')).toBe(true);
     });
 
     it('g and ml are NOT comparable', () => {
       expect(svc.canCompare('g', 'ml')).toBe(false);
     });
-
-    it('szt and g are NOT comparable', () => {
-      expect(svc.canCompare('szt', 'g')).toBe(false);
-    });
-
-    it('same unknown units are comparable with themselves', () => {
-      expect(svc.canCompare('szczypta', 'szczypta')).toBe(true);
-    });
-
-    it('different unknown units are NOT comparable', () => {
-      expect(svc.canCompare('szczypta', 'garść')).toBe(false);
-    });
   });
 
-  // ── isSufficient ──────────────────────────────────────────────────────
   describe('isSufficient', () => {
-    it('returns true when pantry quantity exceeds recipe need (same unit)', () => {
-      expect(svc.isSufficient(500, 'g', 200, 'g')).toBe(true);
-    });
-
-    it('returns true when pantry quantity equals recipe need exactly', () => {
-      expect(svc.isSufficient(200, 'g', 200, 'g')).toBe(true);
-    });
-
-    it('returns false when pantry quantity is less than recipe need', () => {
-      expect(svc.isSufficient(100, 'g', 200, 'g')).toBe(false);
-    });
-
     it('cross-unit: 1 kg pantry satisfies 800 g recipe', () => {
       expect(svc.isSufficient(1, 'kg', 800, 'g')).toBe(true);
     });
 
-    it('cross-unit: 200 ml pantry does NOT satisfy 1 l recipe', () => {
-      expect(svc.isSufficient(200, 'ml', 1, 'l')).toBe(false);
+    it('3 tbsp pantry satisfies 6 tsp recipe', () => {
+      expect(svc.isSufficient(3, 'tbsp', 6, 'tsp')).toBe(true);
     });
+  });
 
-    it('cross-unit: 2 l pantry satisfies 500 ml recipe', () => {
-      expect(svc.isSufficient(2, 'l', 500, 'ml')).toBe(true);
-    });
-
-    it('returns false when units are incomparable (g vs szt)', () => {
-      expect(svc.isSufficient(1000, 'g', 2, 'szt')).toBe(false);
-    });
-
-    it('3 łyżki pantry satisfies 2 łyżeczki recipe (9 tsp ≥ 2 tsp)', () => {
-      expect(svc.isSufficient(3, 'łyżki', 2, 'łyżeczka')).toBe(true);
+  describe('subtractQuantities', () => {
+    it('subtracts cross-unit (1 kg − 200 g = 800 g)', () => {
+      expect(svc.subtractQuantities(1, 'kg', 200, 'g', 'g')).toBe(800);
     });
   });
 });

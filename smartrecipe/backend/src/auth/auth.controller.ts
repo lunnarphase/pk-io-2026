@@ -16,7 +16,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Logowanie — zwraca access + refresh token' })
+  @ApiOperation({ summary: 'Logowanie - zwraca access + refresh token' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
   }

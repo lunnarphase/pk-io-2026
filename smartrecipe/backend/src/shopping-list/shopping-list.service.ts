@@ -5,6 +5,7 @@ import { ShoppingList } from '../domain/entities/shopping-list.entity';
 import { ShoppingListItem } from '../domain/entities/shopping-list-item.entity';
 import { RecipeIngredient } from '../domain/entities/recipe-ingredient.entity';
 import { PantryItem } from '../domain/entities/pantry-item.entity';
+import { PantryService } from '../pantry/pantry.service';
 import { UnitNormalizationService } from '../shared/unit-normalization.service';
 import {
   AddManualItemDto,
@@ -23,6 +24,7 @@ export class ShoppingListService {
     private readonly riRepo: Repository<RecipeIngredient>,
     @InjectRepository(PantryItem)
     private readonly pantryRepo: Repository<PantryItem>,
+    private readonly pantryService: PantryService,
     private readonly units: UnitNormalizationService,
   ) {}
 
@@ -125,8 +127,30 @@ export class ShoppingListService {
       where: { id: itemId, shoppingListId: list.id },
     });
     if (!item) throw new NotFoundException('Shopping list item not found');
+
     Object.assign(item, dto);
     return this.itemRepo.save(item);
+  }
+
+  async syncPurchasedToPantry(userId: string): Promise<ShoppingList> {
+    const list = await this.getOrCreate(userId);
+    const purchased = await this.itemRepo.find({
+      where: { shoppingListId: list.id, purchased: true },
+    });
+
+    for (const item of purchased) {
+      await this.pantryService.upsertItem(userId, item.ingredientId, {
+        quantity: Number(item.quantityNeeded),
+        unit: item.unit,
+        mode: 'add',
+      });
+    }
+
+    if (purchased.length > 0) {
+      await this.itemRepo.remove(purchased);
+    }
+
+    return this.getOrCreate(userId);
   }
 
   async removeItem(userId: string, itemId: string): Promise<void> {
@@ -136,5 +160,13 @@ export class ShoppingListService {
     });
     if (!item) throw new NotFoundException('Shopping list item not found');
     await this.itemRepo.remove(item);
+  }
+
+  async clearAllItems(userId: string): Promise<void> {
+    const list = await this.getOrCreate(userId);
+    const items = await this.itemRepo.find({
+      where: { shoppingListId: list.id },
+    });
+    if (items.length > 0) await this.itemRepo.remove(items);
   }
 }

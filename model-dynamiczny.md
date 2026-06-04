@@ -1,4 +1,4 @@
-# Identyfikacja przypadków użycia, analiza problemu i specyfikacja wymagań — SmartRecipe
+# Identyfikacja przypadków użycia, analiza problemu i specyfikacja wymagań - SmartRecipe
 
 Dokument uzupełnia [model opisowy i diagramy C4](README.md) oraz [model statyczny](model-statyczny.md) o identyfikację aktorów i przypadków użycia, analizę problemu, modele interakcji oraz weryfikowalną specyfikację wymagań.
 
@@ -6,11 +6,12 @@ Dokument uzupełnia [model opisowy i diagramy C4](README.md) oraz [model statycz
 
 ## 1. Identyfikacja aktorów
 
-| ID  | Aktor                     | Typ                 | Opis                                                                                                                                                        |
-| --- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A01 | Użytkownik                | Główny, ludzki      | Domowy kucharz. Rejestruje się i loguje w systemie. Zarządza własną bazą przepisów, spiżarnią i listą zakupów. Korzysta z propozycji posiłków.              |
-| A02 | Zewnętrzne API – żywność  | Drugorzędny, system | Serwis REST dostarczający dane kaloryczne i odżywcze dla składników (np. USDA FoodData Central). Inicjowany przez system przy wzbogacaniu danych składnika. |
-| A03 | Zewnętrzne API – przepisy | Drugorzędny, system | Serwis REST umożliwiający wyszukiwanie przepisów spoza bazy użytkownika (np. Spoonacular). Inicjowany pośrednio przez użytkownika przez UI.                 |
+| ID  | Aktor                     | Typ                 | Opis                                                                                                                                                         |
+| --- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A01 | Użytkownik                | Główny, ludzki      | Domowy kucharz. Rejestruje się i loguje w systemie. Zarządza własną bazą przepisów, spiżarnią i listą zakupów. Korzysta z propozycji posiłków.               |
+| A02 | Zewnętrzne API – żywność  | Drugorzędny, system | Serwis REST USDA FoodData Central - kalorie na 100 g i porcje (`gramsPerPiece`). Wywoływany po tłumaczeniu nazwy (A04).                                      |
+| A03 | Zewnętrzne API – przepisy | Drugorzędny, system | Serwis REST umożliwiający wyszukiwanie przepisów spoza bazy użytkownika (np. Spoonacular). Inicjowany pośrednio przez użytkownika przez UI.                  |
+| A04 | Zewnętrzne API – DeepL    | Drugorzędny, system | Serwis REST tłumaczący polskie nazwy składników na angielski przed zapytaniem do USDA FDC. Inicjowany przez system (moduł kaloryki / wzbogacania składnika). |
 
 > Na tym etapie system nie przewiduje ról administracyjnych ani współdzielenia przepisów między użytkownikami. Każdy użytkownik operuje wyłącznie na własnych danych.
 
@@ -25,6 +26,7 @@ graph LR
     User(("A01\nUżytkownik"))
     NutAPI(["A02\nZewnętrzne API\nŻywność"])
     RecAPI(["A03\nZewnętrzne API\nPrzepisy"])
+    DeeplAPI(["A04\nDeepL API\nTłumaczenie"])
 
     subgraph sys["System SmartRecipe"]
         UC01("UC01\nZarządzanie przepisami")
@@ -39,6 +41,8 @@ graph LR
     User --- UC03
     User --- UC04
     User --- UC05
+    UC01 -. "<<uses>>" .-> DeeplAPI
+    UC01 -. "<<uses>>" .-> NutAPI
     UC03 -. "<<uses>>" .-> NutAPI
     UC05 -. "<<uses>>" .-> RecAPI
     UC04 -. "<<extend>>" .-> UC02
@@ -58,16 +62,16 @@ graph LR
 
 #### UC01: Zarządzanie przepisami
 
-| Pole                         | Opis                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ID**                       | UC01                                                                                                                                                                                                                                                                                                                   |
-| **Nazwa**                    | Zarządzanie przepisami                                                                                                                                                                                                                                                                                                 |
-| **Aktor główny**             | Użytkownik (A01)                                                                                                                                                                                                                                                                                                       |
-| **Cel**                      | Stworzenie i utrzymanie własnej bazy przepisów kulinarnych                                                                                                                                                                                                                                                             |
-| **Warunki wstępne**          | Użytkownik jest zalogowany                                                                                                                                                                                                                                                                                             |
-| **Scenariusz główny**        | 1. Użytkownik tworzy szkic przepisu (tytuł, metadane: dieta, kuchnia, kaloryczność).<br/>2. Definiuje skład – składniki, ilości i jednostki.<br/>3. Publikuje przepis – status zmienia się na `ACTIVE`.<br/>4. Filtruje przepisy według diety, kuchni lub kaloryczności.<br/>5. Archiwizuje lub usuwa wybrany przepis. |
-| **Scenariusze alternatywne** | 2a. Składnik nieznany -> system proponuje dodanie nowego wpisu do katalogu.<br/>3a. Skład przepisu jest pusty -> system blokuje publikację z komunikatem walidacji.<br/>5a. Usuwany przepis jest powiązany z aktywną listą zakupów -> system ostrzega użytkownika przed usunięciem.                                    |
-| **Warunki końcowe**          | Przepis istnieje w systemie z odpowiednim statusem cyklu życia (`DRAFT`, `ACTIVE` lub `ARCHIVED`).                                                                                                                                                                                                                     |
+| Pole                         | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ID**                       | UC01                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Nazwa**                    | Zarządzanie przepisami                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Aktor główny**             | Użytkownik (A01)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Cel**                      | Stworzenie i utrzymanie własnej bazy przepisów kulinarnych                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Warunki wstępne**          | Użytkownik jest zalogowany                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Scenariusz główny**        | 1. Użytkownik tworzy szkic przepisu (tytuł, metadane: liczba porcji, dieta, kuchnia, kaloryczność).<br/>2. Definiuje skład – składniki, ilości i jednostki.<br/>3. Publikuje przepis – status zmienia się na `ACTIVE`.<br/>4. Filtruje przepisy według diety, kuchni lub kaloryczności.<br/>5. Archiwizuje lub usuwa wybrany przepis.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Scenariusze alternatywne** | 2a. Składnik nieznany -> system proponuje dodanie nowego wpisu do katalogu.<br/>2b. Użytkownik pobiera kalorykę składnika - system tłumaczy nazwę PL→EN (DeepL, A04), wyszukuje w USDA (A02), zapisuje `kcalPer100g` i opcjonalnie `gramsPerPiece`.<br/>2c. W szkicu użytkownik uruchamia szacowanie kcal - system sumuje składniki z `kcalPer100g` (i `gramsPerPiece` dla `szt`), dzieli przez `servings`, uzupełnia `estimatedKcalPerServing` (wartość do zapisania przez użytkownika).<br/>2d. Składnik bez kaloryki lub bez przeliczenia na gramy (np. łyżka) - pomijany w sumie; użytkownik dostaje podsumowanie pominiętych pozycji.<br/>2e. DeepL niedostępny lub brak klucza API - wyszukiwanie USDA po oryginalnej polskiej nazwie (gorsze trafienia).<br/>3a. Skład przepisu jest pusty -> system blokuje publikację z komunikatem walidacji.<br/>5a. Usuwany przepis jest powiązany z aktywną listą zakupów -> system ostrzega użytkownika przed usunięciem. |
+| **Warunki końcowe**          | Przepis istnieje w systemie z odpowiednim statusem cyklu życia (`DRAFT`, `ACTIVE` lub `ARCHIVED`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 #### UC02: Zarządzanie spiżarnią
 
@@ -224,13 +228,13 @@ Główne przyczyny i sposób ich adresowania przez system:
 
 ### 4.3 Zidentyfikowane ryzyka i ograniczenia
 
-| ID  | Ryzyko / ograniczenie                                                         | Wpływ  | Proponowana mitigacja                                                            |
-| --- | ----------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------- |
-| R01 | Różnorodność jednostek miar (g, ml, łyżki, sztuki) utrudnia porównanie ilości | Wysoki | Warstwa normalizacji jednostek w `MealSuggestionService` i `ShoppingListService` |
-| R02 | Różne nazwy tych samych składników (np. „cukier" vs „cukier biały")           | Wysoki | Normalizacja katalogu składników; pole `externalFoodId` jako kanoniczny klucz    |
-| R03 | Niedostępność zewnętrznych API (żywność, przepisy)                            | Średni | Cache odpowiedzi API; graceful degradation – system działa bez zewnętrznych API  |
-| R04 | Brak mechanizmu współdzielenia przepisów między użytkownikami                 | Niski  | Poza zakresem MVP; identyfikacja dla przyszłych iteracji                         |
-| R05 | Brak uwierzytelniania i autoryzacji w opisie MVP                              | Wysoki | Wymagane wdrożenie przed wersją produkcyjną (RF14 jako wymaganie bezpieczeństwa) |
+| ID  | Ryzyko / ograniczenie                                                         | Wpływ  | Proponowana mitigacja                                                                                  |
+| --- | ----------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| R01 | Różnorodność jednostek miar (g, ml, łyżki, sztuki) utrudnia porównanie ilości | Wysoki | Warstwa normalizacji jednostek w `MealSuggestionService` i `ShoppingListService`                       |
+| R02 | Różne nazwy tych samych składników (np. „cukier" vs „cukier biały")           | Wysoki | Normalizacja katalogu składników; pole `externalFoodId` jako kanoniczny klucz                          |
+| R03 | Niedostępność zewnętrznych API (DeepL, żywność, przepisy)                     | Średni | Cache tłumaczeń i odpowiedzi USDA; bez DeepL - fallback na polską nazwę; bez USDA - brak auto-kaloryki |
+| R04 | Brak mechanizmu współdzielenia przepisów między użytkownikami                 | Niski  | Poza zakresem MVP; identyfikacja dla przyszłych iteracji                                               |
+| R05 | Brak uwierzytelniania i autoryzacji w opisie MVP                              | Wysoki | Wymagane wdrożenie przed wersją produkcyjną (RF14 jako wymaganie bezpieczeństwa)                       |
 
 ---
 
@@ -268,7 +272,41 @@ sequenceDiagram
     SPA-->>U: wyświetl listę propozycji posiłków
 ```
 
-### 5.2 Diagram sekwencji: UC04 – Wypełnienie listy zakupów z przepisów
+### 5.2 Diagram sekwencji: wzbogacanie składnika (DeepL + USDA)
+
+Źródło: [diagrams/sequenceDiagrams/nutritionEnrich.mmd](diagrams/sequenceDiagrams/nutritionEnrich.mmd).
+
+```mermaid
+sequenceDiagram
+    actor U as Użytkownik
+    participant SPA as Aplikacja webowa
+    participant API as Backend API
+    participant NS as NutritionService
+    participant DeepL as DeepL API
+    participant USDA as USDA FDC API
+    participant DB as Baza danych
+
+    U->>SPA: Pobierz kalorykę / wyszukaj składnik
+    SPA->>API: GET /nutrition/search?q=...
+    API->>NS: searchFoods(query)
+    NS->>DeepL: POST /translate (PL→EN)
+    DeepL-->>NS: np. "wheat flour"
+    NS->>USDA: GET /foods/search?q=...
+    USDA-->>NS: lista FDC
+    NS-->>API: wyniki (fdcId, kcal/100g)
+    API-->>SPA: 200 OK
+    U->>SPA: Zapisz / auto-enrich
+    SPA->>API: POST /nutrition/enrich/:id
+    API->>NS: enrichIngredient(id)
+    NS->>USDA: GET /food/{fdcId}
+    USDA-->>NS: kcal, foodPortions
+    NS->>DB: zapisz kcalPer100g, gramsPerPiece, externalFoodId
+    DB-->>NS: Ingredient
+    NS-->>API: Ingredient
+    API-->>SPA: 200 OK
+```
+
+### 5.3 Diagram sekwencji: UC04 – Wypełnienie listy zakupów z przepisów
 
 ```mermaid
 sequenceDiagram
@@ -303,23 +341,25 @@ sequenceDiagram
 
 ### 6.1 Wymagania funkcjonalne
 
-| ID   | Wymaganie                                                                                                                     | Priorytet   | Powiązany UC |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------ |
-| RF01 | System umożliwia tworzenie, edycję, publikowanie, archiwizowanie i usuwanie przepisów                                         | Must-have   | UC01         |
-| RF02 | Przepis zawiera: tytuł, instrukcje, listę składników z ilościami i jednostkami, typ diety, typ kuchni, szacowaną kaloryczność | Must-have   | UC01         |
-| RF03 | Przepis przechodzi przez cykl życia: `DRAFT` -> `ACTIVE` ↔ `ARCHIVED`; niedozwolone przejścia są odrzucane                    | Must-have   | UC01         |
-| RF04 | System umożliwia filtrowanie przepisów według diety, typu kuchni i zakresu kaloryczności                                      | Should-have | UC01         |
-| RF05 | System umożliwia zarządzanie wirtualną spiżarnią (dodawanie, edycja ilości, usuwanie składników)                              | Must-have   | UC02         |
-| RF06 | System generuje listę przepisów możliwych do przygotowania wyłącznie z dostępnych w spiżarni składników                       | Must-have   | UC03         |
-| RF07 | Algorytm dopasowania przepisów uwzględnia normalizację jednostek miar (g/kg, ml/l, łyżki/łyżeczki)                            | Must-have   | UC03         |
-| RF08 | System wyróżnia przepisy, do których brakuje co najwyżej 2 składników (sekcja „prawie gotowe")                                | Could-have  | UC03         |
-| RF09 | System utrzymuje jedną aktywną listę zakupów per użytkownik, tworzoną automatycznie przy pierwszym otwarciu                   | Must-have   | UC04         |
-| RF10 | System automatycznie oblicza brakujące składniki (skład wybranych przepisów minus stan spiżarni) i dodaje je do listy zakupów | Must-have   | UC04         |
-| RF11 | Pokrywające się składniki z wielu przepisów są scalane w jedną pozycję listy z sumowaną ilością                               | Must-have   | UC04         |
-| RF12 | Użytkownik może ręcznie dodawać, edytować i usuwać pozycje z listy zakupów                                                    | Must-have   | UC04         |
-| RF13 | Użytkownik może oznaczać pozycje listy zakupów jako zakupione (`purchased = true`)                                            | Must-have   | UC04         |
-| RF14 | System umożliwia wyszukiwanie przepisów za pomocą zewnętrznego API i importowanie ich do bazy użytkownika jako `DRAFT`        | Should-have | UC05         |
-| RF15 | System pobiera i cachuje dane kaloryczne składników z zewnętrznego API żywności                                               | Should-have | UC03         |
+| ID   | Wymaganie                                                                                                                                                     | Priorytet   | Powiązany UC |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------ |
+| RF01 | System umożliwia tworzenie, edycję, publikowanie, archiwizowanie i usuwanie przepisów                                                                         | Must-have   | UC01         |
+| RF02 | Przepis zawiera: tytuł, instrukcje, listę składników z ilościami i jednostkami, liczbę porcji, typ diety, typ kuchni, szacowaną kaloryczność (kcal na porcję) | Must-have   | UC01         |
+| RF03 | Przepis przechodzi przez cykl życia: `DRAFT` -> `ACTIVE` ↔ `ARCHIVED`; niedozwolone przejścia są odrzucane                                                    | Must-have   | UC01         |
+| RF04 | System umożliwia filtrowanie przepisów według diety, typu kuchni i zakresu kaloryczności                                                                      | Should-have | UC01         |
+| RF05 | System umożliwia zarządzanie wirtualną spiżarnią (dodawanie, edycja ilości, usuwanie składników)                                                              | Must-have   | UC02         |
+| RF06 | System generuje listę przepisów możliwych do przygotowania wyłącznie z dostępnych w spiżarni składników                                                       | Must-have   | UC03         |
+| RF07 | Algorytm dopasowania przepisów uwzględnia normalizację jednostek miar (g/kg, ml/l, łyżki/łyżeczki)                                                            | Must-have   | UC03         |
+| RF08 | System wyróżnia przepisy, do których brakuje co najwyżej 2 składników (sekcja „prawie gotowe")                                                                | Could-have  | UC03         |
+| RF09 | System utrzymuje jedną aktywną listę zakupów per użytkownik, tworzoną automatycznie przy pierwszym otwarciu                                                   | Must-have   | UC04         |
+| RF10 | System automatycznie oblicza brakujące składniki (skład wybranych przepisów minus stan spiżarni) i dodaje je do listy zakupów                                 | Must-have   | UC04         |
+| RF11 | Pokrywające się składniki z wielu przepisów są scalane w jedną pozycję listy z sumowaną ilością                                                               | Must-have   | UC04         |
+| RF12 | Użytkownik może ręcznie dodawać, edytować i usuwać pozycje z listy zakupów                                                                                    | Must-have   | UC04         |
+| RF13 | Użytkownik może oznaczać pozycje listy zakupów jako zakupione (`purchased = true`)                                                                            | Must-have   | UC04         |
+| RF14 | System umożliwia wyszukiwanie przepisów za pomocą zewnętrznego API i importowanie ich do bazy użytkownika jako `DRAFT`                                        | Should-have | UC05         |
+| RF15 | System pobiera i cachuje dane kaloryczne składników z zewnętrznego API żywności (`kcalPer100g`, opcjonalnie `gramsPerPiece` z porcji FDC / serving)           | Should-have | UC01, UC03   |
+| RF16 | W szkicu przepisu system może oszacować `estimatedKcalPerServing` na podstawie składu, liczby porcji i znormalizowanych jednostek (g, ml, szt z wagą z FDC)   | Could-have  | UC01         |
+| RF17 | Przed wyszukiwaniem składnika w USDA system tłumaczy polską nazwę na angielski przez DeepL (A04); przy braku API - wyszukiwanie po nazwie polskiej            | Should-have | UC01         |
 
 ### 6.2 Wymagania niefunkcjonalne
 

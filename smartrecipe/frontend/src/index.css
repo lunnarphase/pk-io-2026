@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/landing.css";
+@import "./styles/app.css";
+@import "./styles/nav.css";
+@import "./styles/suggestions.css";
+@import "./styles/pantry.css";
+@import "./styles/shopping-list.css";
+@import "./styles/recipes.css";
+@import "./styles/recipe-form.css";
+@import "./styles/pantry-dialog.css";
+@import "./styles/fill-recipes-dialog.css";
+@import "./styles/external-recipes.css";
+@import "./styles/nutrition-dialog.css";
+@import "./styles/ingredient-search.css";
+@import "./styles/combobox.css";
