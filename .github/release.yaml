@@ -1,0 +1,23 @@
+changelog:
+  categories:
+    - title: 🚀 Features
+      labels:
+        - enhancement
+    - title: 🐛 Bug fixes
+      labels:
+        - bug
+    - title: 🛠️ Changes
+      labels:
+        - "*"
+      exclude:
+        labels:
+          - dependencies
+          - CI
+          - github_actions
+    - title: ♾️ CI/CD
+      labels:
+        - CI
+        - github_actions
+    - title: ⬆️ Dependencies
+      labels:
+        - dependencies

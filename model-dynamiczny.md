@@ -6,11 +6,11 @@ Dokument uzupełnia [model opisowy i diagramy C4](README.md) oraz [model statycz
 
 ## 1. Identyfikacja aktorów
 
-| ID  | Aktor                     | Typ                 | Opis                                                                                                                                                      |
-| --- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A01 | Użytkownik                | Główny, ludzki      | Domowy kucharz. Rejestruje się i loguje w systemie. Zarządza własną bazą przepisów, spiżarnią i listą zakupów. Korzysta z propozycji posiłków.            |
-| A02 | Zewnętrzne API – żywność  | Drugorzędny, system | Serwis REST dostarczający dane kaloryczne i odżywcze dla składników (np. Edamam, Nutritionix). Inicjowany przez system przy wzbogacaniu danych składnika. |
-| A03 | Zewnętrzne API – przepisy | Drugorzędny, system | Serwis REST umożliwiający wyszukiwanie przepisów spoza bazy użytkownika (np. Spoonacular). Inicjowany pośrednio przez użytkownika przez UI.               |
+| ID  | Aktor                     | Typ                 | Opis                                                                                                                                                        |
+| --- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A01 | Użytkownik                | Główny, ludzki      | Domowy kucharz. Rejestruje się i loguje w systemie. Zarządza własną bazą przepisów, spiżarnią i listą zakupów. Korzysta z propozycji posiłków.              |
+| A02 | Zewnętrzne API – żywność  | Drugorzędny, system | Serwis REST dostarczający dane kaloryczne i odżywcze dla składników (np. USDA FoodData Central). Inicjowany przez system przy wzbogacaniu danych składnika. |
+| A03 | Zewnętrzne API – przepisy | Drugorzędny, system | Serwis REST umożliwiający wyszukiwanie przepisów spoza bazy użytkownika (np. Spoonacular). Inicjowany pośrednio przez użytkownika przez UI.                 |
 
 > Na tym etapie system nie przewiduje ról administracyjnych ani współdzielenia przepisów między użytkownikami. Każdy użytkownik operuje wyłącznie na własnych danych.
 

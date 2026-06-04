@@ -1,0 +1,75 @@
+/* Hallmark · pre-emit critique: P5 H5 E4 S4 R5 V4 */
+/* Hallmark · genre: editorial · macrostructure: Narrative Workflow · theme: Garden
+ * tone: warm, considered · anchor hue: 110° herb-sage
+ * nav: N6 Newspaper masthead · footer: Ft5 Statement
+ * enrichment: inline SVG Tier B (stage visuals)
+ * display: Fraunces · body: IBM Plex Sans · outlier: Geist Mono (stage numbers)
+ */
+
+:root {
+  /* ── Colour ──────────────────────────────────────────── */
+  --color-paper:    oklch(96%  0.012 110);
+  --color-paper-2:  oklch(93%  0.014 110);
+  --color-paper-3:  oklch(88%  0.018 113);
+  --color-rule:     oklch(80%  0.012 110);
+  --color-neutral:  oklch(58%  0.009 108);
+  --color-muted:    oklch(42%  0.008 105);
+  --color-ink:      oklch(17%  0.012 115);
+  --color-accent:   oklch(38%  0.17  148);
+  --color-focus:    oklch(52%  0.19  148);
+
+  /* ── Typography ─────────────────────────────────────── */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body:    "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: "Geist Mono", ui-monospace, monospace;
+
+  /* ── Text scale — major third 1.25 ─────────────────── */
+  --text-xs:        0.64rem;
+  --text-sm:        0.8rem;
+  --text-base:      1rem;
+  --text-md:        1.25rem;
+  --text-lg:        1.5625rem;
+  --text-xl:        1.9531rem;
+  --text-2xl:       2.4414rem;
+  --text-3xl:       3.0518rem;
+  --text-4xl:       3.8147rem;
+  --text-display:   clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --text-display-s: clamp(1.75rem, 3vw + 0.75rem, 3rem);
+
+  /* ── Spacing — 4pt scale ────────────────────────────── */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  /* ── Easing ─────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.83, 0, 0.17, 1);
+
+  /* ── Duration ───────────────────────────────────────── */
+  --dur-fast:   120ms;
+  --dur-base:   240ms;
+  --dur-slow:   400ms;
+  --dur-reveal: 560ms;
+
+  /* ── Radius ─────────────────────────────────────────── */
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+
+  /* ── Shadows ────────────────────────────────────────── */
+  --shadow-whisper: 0 1px 2px oklch(20% 0.01 110 / 0.05);
+
+  /* ── Z-index ────────────────────────────────────────── */
+  --z-below:  -1;
+  --z-base:    0;
+  --z-raised: 10;
+  --z-nav:   100;
+}

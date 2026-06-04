@@ -1,0 +1,8 @@
+**/**/.env
+node_modules
+node_modules/**
+dist/**
+dist
+.DS_STORE
+.pnpm_store
+.pnpm_store/**

@@ -1,0 +1,22 @@
+export enum DietType {
+  OMNIVORE = 'OMNIVORE',
+  VEGETARIAN = 'VEGETARIAN',
+  VEGAN = 'VEGAN',
+  KETO = 'KETO',
+}
+
+export enum CuisineType {
+  ITALIAN = 'ITALIAN',
+  POLISH = 'POLISH',
+  EUROPEAN_OTHER = 'EUROPEAN_OTHER',
+  SOUTH_AMERICAN = 'SOUTH_AMERICAN',
+  MIDDLE_EASTERN = 'MIDDLE_EASTERN',
+  ASIAN = 'ASIAN',
+  OTHER = 'OTHER',
+}
+
+export enum RecipeLifecycleStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  ARCHIVED = 'ARCHIVED',
+}

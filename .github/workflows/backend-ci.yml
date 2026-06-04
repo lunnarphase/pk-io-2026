@@ -1,0 +1,44 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "smartrecipe/backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+defaults:
+  run:
+    working-directory: smartrecipe/backend
+
+jobs:
+  quality:
+    name: 🧹 BE Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: 📚 Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10
+
+      - name: 📚 Setup Node.js environment
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: "smartrecipe/backend/package.json"
+          cache: pnpm
+          cache-dependency-path: smartrecipe/backend/pnpm-lock.yaml
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧹 Lint
+        run: pnpm exec eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: 🧹 Prettier
+        run: pnpm exec prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      - name: ⚙️ Test
+        run: pnpm test
