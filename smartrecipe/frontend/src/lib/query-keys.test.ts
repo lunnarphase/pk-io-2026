@@ -11,8 +11,13 @@ describe('queryKeys', () => {
     expect(key[0]).toEqual({
       resource: 'suggestions',
       scope: 'list',
-      data: { diet: DietType.KETO, cuisine: CuisineType.ITALIAN },
+      data: { diet: DietType.KETO, cuisine: CuisineType.ITALIAN, pantryVersion: undefined },
     })
+  })
+
+  it('includes pantry version in suggestions cache key', () => {
+    const key = queryKeys.suggestions(undefined, 1_700_000_000_000)
+    expect(key[0].data.pantryVersion).toBe(1_700_000_000_000)
   })
 
   it('isolates recipe list and detail caches', () => {

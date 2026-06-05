@@ -28,8 +28,11 @@ export function ExternalRecipesPage() {
     queryFn: ({ pageParam }) => searchExternalRecipes(debounced, pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
-      const nextOffset = lastPage.offset + lastPage.results.length
-      if (nextOffset >= lastPage.totalResults || lastPage.results.length === 0) {
+      const results = lastPage?.results ?? []
+      const offset = lastPage?.offset ?? 0
+      const totalResults = lastPage?.totalResults ?? results.length
+      const nextOffset = offset + results.length
+      if (nextOffset >= totalResults || results.length === 0) {
         return undefined
       }
       return nextOffset

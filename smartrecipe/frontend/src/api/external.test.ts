@@ -18,6 +18,16 @@ describe('external recipes API (UC05)', () => {
     })
   })
 
+  it('normalizes malformed search payload', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: {} })
+    await expect(searchExternalRecipes('pizza', 5)).resolves.toEqual({
+      results: [],
+      offset: 5,
+      number: 0,
+      totalResults: 0,
+    })
+  })
+
   it('importExternalRecipe stringifies external id', async () => {
     vi.mocked(apiClient.post).mockResolvedValue({
       data: {

@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client'
+import { ensureArray } from '@/lib/ensure-array'
 import { normalizeRecipeIngredientLines } from '@/lib/recipe-ingredients'
 import type { CuisineType, DietType, PantryItem, Recipe, RecipeIngredientLine } from '@/types/domain'
 
@@ -11,7 +12,7 @@ export interface RecipeFilters {
 
 export async function listRecipes(filters?: RecipeFilters): Promise<Recipe[]> {
   const { data } = await apiClient.get<Recipe[]>('/recipes', { params: filters })
-  return data
+  return ensureArray<Recipe>(data, 'recipes')
 }
 
 export async function getRecipe(id: string): Promise<Recipe> {

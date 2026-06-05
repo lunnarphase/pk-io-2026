@@ -46,8 +46,8 @@ export function RecipeDraftDetail({ recipe }: RecipeDraftDetailProps) {
   const linesRef = useRef<RecipeIngredientLine[]>([]);
   const baselineRef = useRef(recipeDraftSnapshotFromRecipe(recipe));
   const skipSuccessToastRef = useRef(false);
-  const loadedRecipeIdRef = useRef(recipeId);
   const recipeId = recipe.id;
+  const loadedRecipeIdRef = useRef(recipeId);
   const [lines, setLines] = useState<RecipeIngredientLine[]>(() =>
     (recipe.ingredients ?? []).map(normalizeIngredientLine),
   );

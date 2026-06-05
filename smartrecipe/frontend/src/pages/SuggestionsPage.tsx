@@ -28,8 +28,9 @@ export function SuggestionsPage() {
   })
 
   const suggestionsQuery = useQuery({
-    queryKey: queryKeys.suggestions(filters),
+    queryKey: queryKeys.suggestions(filters, pantryQuery.dataUpdatedAt),
     queryFn: () => getSuggestions(filters),
+    enabled: pantryQuery.isSuccess,
     staleTime: 60_000,
     placeholderData: keepPreviousData,
   })

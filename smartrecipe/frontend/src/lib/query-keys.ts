@@ -1,8 +1,17 @@
 import type { CuisineType, DietType } from '@/types/domain'
 
 export const queryKeys = {
-  suggestions: (filters?: { diet?: DietType; cuisine?: CuisineType }) =>
-    [{ resource: 'suggestions', scope: 'list', data: filters }] as const,
+  suggestions: (
+    filters?: { diet?: DietType; cuisine?: CuisineType },
+    pantryVersion?: number,
+  ) =>
+    [
+      {
+        resource: 'suggestions',
+        scope: 'list',
+        data: { ...filters, pantryVersion },
+      },
+    ] as const,
   recipes: {
     list: (filters?: {
       diet?: DietType

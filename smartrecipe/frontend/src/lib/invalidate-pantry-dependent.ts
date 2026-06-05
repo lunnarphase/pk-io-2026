@@ -4,5 +4,8 @@ import type { QueryClient } from '@tanstack/react-query'
 export function invalidatePantryDependentQueries(qc: QueryClient): void {
   void qc.invalidateQueries({ queryKey: [{ resource: 'pantry' }] })
   void qc.invalidateQueries({ queryKey: [{ resource: 'recipes' }] })
-  void qc.invalidateQueries({ queryKey: [{ resource: 'suggestions' }] })
+  void qc.invalidateQueries({
+    queryKey: [{ resource: 'suggestions' }],
+    refetchType: 'all',
+  })
 }

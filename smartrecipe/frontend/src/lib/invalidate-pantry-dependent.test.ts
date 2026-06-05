@@ -12,6 +12,9 @@ describe('invalidatePantryDependentQueries', () => {
     expect(spy).toHaveBeenCalledTimes(3)
     expect(spy).toHaveBeenCalledWith({ queryKey: [{ resource: 'pantry' }] })
     expect(spy).toHaveBeenCalledWith({ queryKey: [{ resource: 'recipes' }] })
-    expect(spy).toHaveBeenCalledWith({ queryKey: [{ resource: 'suggestions' }] })
+    expect(spy).toHaveBeenCalledWith({
+      queryKey: [{ resource: 'suggestions' }],
+      refetchType: 'all',
+    })
   })
 })
