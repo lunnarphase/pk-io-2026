@@ -6,6 +6,12 @@ import {
   createE2eApp,
   registerAndLogin,
 } from './helpers/e2e-bootstrap';
+import {
+  asBody,
+  IdBody,
+  PantryItemBody,
+  SuggestionsBody,
+} from './helpers/e2e-types';
 
 /**
  * RF05 / RF06 — pantry management and suggestions integration.
@@ -31,7 +37,7 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .send({ name: `E2E flour ${Date.now()}` })
       .expect(201);
 
-    const ingredientId = ingRes.body.id as string;
+    const ingredientId = asBody<IdBody>(ingRes.body).id;
 
     await request(app.getHttpServer())
       .put(`/pantry/items/${ingredientId}`)
@@ -39,8 +45,9 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .send({ quantity: 500, unit: 'g' })
       .expect(200)
       .expect((res) => {
-        expect(res.body.quantity).toBe(500);
-        expect(res.body.unit).toBe('g');
+        const body = asBody<PantryItemBody>(res.body);
+        expect(body.quantity).toBe(500);
+        expect(body.unit).toBe('g');
       });
 
     const listRes = await request(app.getHttpServer())
@@ -49,7 +56,7 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .expect(200);
 
     expect(
-      (listRes.body as { ingredientId: string }[]).some(
+      asBody<{ ingredientId: string }[]>(listRes.body).some(
         (item) => item.ingredientId === ingredientId,
       ),
     ).toBe(true);
@@ -73,14 +80,17 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .send({ name: `E2E water ${suffix}` })
       .expect(201);
 
+    const flourId = asBody<IdBody>(flour.body).id;
+    const waterId = asBody<IdBody>(water.body).id;
+
     await request(app.getHttpServer())
-      .put(`/pantry/items/${flour.body.id}`)
+      .put(`/pantry/items/${flourId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ quantity: 1000, unit: 'g' })
       .expect(200);
 
     await request(app.getHttpServer())
-      .put(`/pantry/items/${water.body.id}`)
+      .put(`/pantry/items/${waterId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ quantity: 1000, unit: 'ml' })
       .expect(200);
@@ -91,19 +101,21 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .send({ title: `E2E bread ${suffix}` })
       .expect(201);
 
+    const recipeId = asBody<IdBody>(recipeRes.body).id;
+
     await request(app.getHttpServer())
-      .put(`/recipes/${recipeRes.body.id}/ingredients`)
+      .put(`/recipes/${recipeId}/ingredients`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         ingredients: [
-          { ingredientId: flour.body.id, quantity: 500, unit: 'g' },
-          { ingredientId: water.body.id, quantity: 300, unit: 'ml' },
+          { ingredientId: flourId, quantity: 500, unit: 'g' },
+          { ingredientId: waterId, quantity: 300, unit: 'ml' },
         ],
       })
       .expect(200);
 
     await request(app.getHttpServer())
-      .post(`/recipes/${recipeRes.body.id}/publish`)
+      .post(`/recipes/${recipeId}/publish`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -112,26 +124,21 @@ describe('Pantry & Suggestions API (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(suggestions.body).toHaveProperty('available');
-    expect(suggestions.body).toHaveProperty('almostAvailable');
-    expect(suggestions.body).toHaveProperty('needsMore');
+    const body = asBody<SuggestionsBody>(suggestions.body);
+    expect(body).toHaveProperty('available');
+    expect(body).toHaveProperty('almostAvailable');
+    expect(body).toHaveProperty('needsMore');
 
-    const readyIds = (suggestions.body.available as { id: string }[]).map(
-      (r) => r.id,
-    );
-    const almostIds = (suggestions.body.almostAvailable as { id: string }[]).map(
-      (r) => r.id,
-    );
-    const needsMoreIds = (suggestions.body.needsMore as { id: string }[]).map(
-      (r) => r.id,
-    );
+    const readyIds = body.available.map((r) => r.id);
+    const almostIds = body.almostAvailable.map((r) => r.id);
+    const needsMoreIds = body.needsMore.map((r) => r.id);
 
-    expect(readyIds).toContain(recipeRes.body.id);
-    expect(almostIds).not.toContain(recipeRes.body.id);
-    expect(needsMoreIds).not.toContain(recipeRes.body.id);
+    expect(readyIds).toContain(recipeId);
+    expect(almostIds).not.toContain(recipeId);
+    expect(needsMoreIds).not.toContain(recipeId);
 
     await request(app.getHttpServer())
-      .delete(`/recipes/${recipeRes.body.id}`)
+      .delete(`/recipes/${recipeId}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(204);
   });

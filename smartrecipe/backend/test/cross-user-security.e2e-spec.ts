@@ -2,12 +2,14 @@ import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { Repository } from 'typeorm';
 import { User } from '../src/domain/entities/user.entity';
 import {
   closeE2eApp,
   createE2eApp,
   registerAndLogin,
 } from './helpers/e2e-bootstrap';
+import { asBody, IdBody } from './helpers/e2e-types';
 
 /**
  * RNF04 / RNF05 — cross-user isolation and password storage.
@@ -39,7 +41,7 @@ describe('Cross-user security (e2e)', () => {
       .send({ title: 'Private recipe' })
       .expect(201);
 
-    const recipeId = createRes.body.id as string;
+    const recipeId = asBody<IdBody>(createRes.body).id;
 
     await request(app.getHttpServer())
       .get(`/recipes/${recipeId}`)
@@ -65,7 +67,7 @@ describe('Cross-user security (e2e)', () => {
       .send({ name: `E2E salt ${Date.now()}` })
       .expect(201);
 
-    const ingredientId = ingRes.body.id as string;
+    const ingredientId = asBody<IdBody>(ingRes.body).id;
 
     await request(app.getHttpServer())
       .put(`/pantry/items/${ingredientId}`)
@@ -79,7 +81,7 @@ describe('Cross-user security (e2e)', () => {
       .expect(200);
 
     expect(
-      (otherPantry.body as { ingredientId: string }[]).some(
+      asBody<{ ingredientId: string }[]>(otherPantry.body).some(
         (item) => item.ingredientId === ingredientId,
       ),
     ).toBe(false);
@@ -96,7 +98,7 @@ describe('Cross-user security (e2e)', () => {
   });
 
   it('RNF05: stores password as bcrypt hash in database', async () => {
-    const userRepo = app.get(getRepositoryToken(User));
+    const userRepo = app.get<Repository<User>>(getRepositoryToken(User));
     const user = await userRepo.findOne({ where: { email: ownerEmail } });
     expect(user).toBeTruthy();
     expect(user!.passwordHash).not.toBe('TestPass123!');

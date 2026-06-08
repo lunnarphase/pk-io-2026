@@ -54,9 +54,13 @@ describe('IngredientsService', () => {
     it('searches ingredients by name', async () => {
       mockRepo.find.mockResolvedValue([makeIngredient()]);
       await service.findAll('mąka');
-      expect(mockRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { name: expect.anything() } }),
-      );
+      expect(mockRepo.find).toHaveBeenCalledTimes(1);
+      const calls = mockRepo.find.mock.calls as Array<
+        [{ take: number; where: { name: unknown } }]
+      >;
+      const callArg = calls[0][0];
+      expect(callArg.take).toBe(50);
+      expect(callArg.where.name).toBeDefined();
     });
   });
 
@@ -88,9 +92,9 @@ describe('IngredientsService', () => {
   describe('create', () => {
     it('throws ConflictException for duplicate name', async () => {
       mockRepo.findOne.mockResolvedValue(makeIngredient());
-      await expect(
-        service.create({ name: 'Mąka' }),
-      ).rejects.toBeInstanceOf(ConflictException);
+      await expect(service.create({ name: 'Mąka' })).rejects.toBeInstanceOf(
+        ConflictException,
+      );
     });
 
     it('creates a new ingredient', async () => {

@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
+import { asBody, AuthTokensResponse } from './e2e-types';
 
 export async function createE2eApp(): Promise<INestApplication<App>> {
   const moduleFixture = await Test.createTestingModule({
@@ -51,7 +52,7 @@ export async function loginUser(
     .post('/auth/login')
     .send({ email, password })
     .expect(200);
-  return res.body.accessToken as string;
+  return asBody<AuthTokensResponse>(res.body).accessToken;
 }
 
 export async function registerAndLogin(

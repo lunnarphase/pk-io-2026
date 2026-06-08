@@ -6,6 +6,7 @@ import {
   createE2eApp,
   registerAndLogin,
 } from './helpers/e2e-bootstrap';
+import { asBody, IdBody, RecipeBody } from './helpers/e2e-types';
 
 /**
  * RF01 / RF02 / RF03 — functional API tests for recipe CRUD and lifecycle.
@@ -31,15 +32,16 @@ describe('Recipes API (e2e)', () => {
       .send({ title: 'E2E Makaron' })
       .expect(201);
 
-    const recipeId = createRes.body.id as string;
-    expect(createRes.body.lifecycleStatus).toBe('DRAFT');
+    const created = asBody<RecipeBody>(createRes.body);
+    const recipeId = created.id;
+    expect(created.lifecycleStatus).toBe('DRAFT');
 
     await request(app.getHttpServer())
       .get(`/recipes/${recipeId}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body.title).toBe('E2E Makaron');
+        expect(asBody<RecipeBody>(res.body).title).toBe('E2E Makaron');
       });
 
     await request(app.getHttpServer())
@@ -48,7 +50,7 @@ describe('Recipes API (e2e)', () => {
       .send({ servings: 4 })
       .expect(200)
       .expect((res) => {
-        expect(res.body.servings).toBe(4);
+        expect(asBody<RecipeBody>(res.body).servings).toBe(4);
       });
 
     await request(app.getHttpServer())
@@ -77,7 +79,7 @@ describe('Recipes API (e2e)', () => {
       .send({ title: 'Lifecycle test' })
       .expect(201);
 
-    const recipeId = createRes.body.id as string;
+    const recipeId = asBody<IdBody>(createRes.body).id;
 
     await request(app.getHttpServer())
       .post(`/recipes/${recipeId}/archive`)
@@ -97,13 +99,15 @@ describe('Recipes API (e2e)', () => {
       .send({ name: `E2E lifecycle ${Date.now()}` })
       .expect(201);
 
+    const ingredientId = asBody<IdBody>(ingRes.body).id;
+
     const createRes = await request(app.getHttpServer())
       .post('/recipes')
       .set('Authorization', `Bearer ${token}`)
       .send({ title: 'Valid lifecycle' })
       .expect(201);
 
-    const recipeId = createRes.body.id as string;
+    const recipeId = asBody<IdBody>(createRes.body).id;
 
     await request(app.getHttpServer())
       .put(`/recipes/${recipeId}/ingredients`)
@@ -111,7 +115,7 @@ describe('Recipes API (e2e)', () => {
       .send({
         ingredients: [
           {
-            ingredientId: ingRes.body.id,
+            ingredientId,
             quantity: 100,
             unit: 'g',
           },
@@ -123,19 +127,25 @@ describe('Recipes API (e2e)', () => {
       .post(`/recipes/${recipeId}/publish`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
-      .expect((res) => expect(res.body.lifecycleStatus).toBe('ACTIVE'));
+      .expect((res) =>
+        expect(asBody<RecipeBody>(res.body).lifecycleStatus).toBe('ACTIVE'),
+      );
 
     await request(app.getHttpServer())
       .post(`/recipes/${recipeId}/archive`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
-      .expect((res) => expect(res.body.lifecycleStatus).toBe('ARCHIVED'));
+      .expect((res) =>
+        expect(asBody<RecipeBody>(res.body).lifecycleStatus).toBe('ARCHIVED'),
+      );
 
     await request(app.getHttpServer())
       .post(`/recipes/${recipeId}/unarchive`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
-      .expect((res) => expect(res.body.lifecycleStatus).toBe('ACTIVE'));
+      .expect((res) =>
+        expect(asBody<RecipeBody>(res.body).lifecycleStatus).toBe('ACTIVE'),
+      );
 
     await request(app.getHttpServer())
       .delete(`/recipes/${recipeId}`)

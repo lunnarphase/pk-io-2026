@@ -75,8 +75,12 @@ describe('PantryService', () => {
     });
 
     it('adds quantity when item exists and mode is add', async () => {
-      mockRepo.findOne.mockResolvedValue(makeItem({ quantity: 100, unit: 'g' }));
-      mockRepo.save.mockImplementation((item: PantryItem) => Promise.resolve(item));
+      mockRepo.findOne.mockResolvedValue(
+        makeItem({ quantity: 100, unit: 'g' }),
+      );
+      mockRepo.save.mockImplementation((item: PantryItem) =>
+        Promise.resolve(item),
+      );
 
       const result = await service.upsertItem(USER_ID, ING_ID, {
         quantity: 50,
@@ -88,7 +92,9 @@ describe('PantryService', () => {
     });
 
     it('throws BadRequestException when add mode uses incompatible units', async () => {
-      mockRepo.findOne.mockResolvedValue(makeItem({ quantity: 100, unit: 'g' }));
+      mockRepo.findOne.mockResolvedValue(
+        makeItem({ quantity: 100, unit: 'g' }),
+      );
 
       await expect(
         service.upsertItem(USER_ID, ING_ID, {
@@ -151,9 +157,9 @@ describe('PantryService', () => {
 
   describe('consumeIngredients', () => {
     it('throws when recipe has no ingredients', async () => {
-      await expect(service.consumeIngredients(USER_ID, [])).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.consumeIngredients(USER_ID, []),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('throws when pantry lacks sufficient quantity', async () => {
@@ -167,9 +173,7 @@ describe('PantryService', () => {
 
     it('deducts ingredients and removes depleted items', async () => {
       const item = makeItem({ quantity: 200, unit: 'g' });
-      mockRepo.find
-        .mockResolvedValueOnce([item])
-        .mockResolvedValueOnce([]);
+      mockRepo.find.mockResolvedValueOnce([item]).mockResolvedValueOnce([]);
       mockRepo.save.mockResolvedValue(item);
 
       await service.consumeIngredients(USER_ID, [
