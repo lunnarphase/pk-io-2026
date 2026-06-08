@@ -226,6 +226,7 @@ pnpm build        # kompilacja TypeScript → dist/
 pnpm start        # start z pliku dist/ (wymaga wcześniejszego build)
 pnpm start:prod   # jak wyżej, NODE_ENV=production
 pnpm lint         # ESLint
-pnpm test         # testy jednostkowe (Jest)
-pnpm test:e2e     # testy e2e
+pnpm test         # jednostkowe + modułowe (Jest, 135 testów)
+pnpm test:e2e     # funkcjonalne API + PostgreSQL (10 testów)
+pnpm test:all     # test:cov + test:e2e
 ```

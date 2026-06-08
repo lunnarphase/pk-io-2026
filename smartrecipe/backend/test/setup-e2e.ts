@@ -1,0 +1,10 @@
+process.env.JWT_SECRET ??= 'e2e-test-jwt-secret-minimum-32-chars';
+process.env.JWT_REFRESH_SECRET ??= 'e2e-test-refresh-secret-min-32-chars';
+process.env.JWT_ACCESS_TTL ??= '900';
+process.env.JWT_REFRESH_TTL ??= '604800';
+process.env.NODE_ENV ??= 'test';
+process.env.DB_HOST ??= 'localhost';
+process.env.DB_PORT ??= '5432';
+process.env.DB_NAME ??= 'smartrecipe';
+process.env.DB_USER ??= 'smartrecipe';
+process.env.DB_PASS ??= 'smartrecipe';

@@ -112,6 +112,12 @@ Diagramy klas, obiektów, pakietów, komponentów oraz stany wybranych obiektów
 
 Aktorzy, przypadki użycia, analiza problemu, diagramy sekwencji i czynności oraz specyfikacja wymagań (RF/RNF): [model-dynamiczny.md](model-dynamiczny.md).
 
+### Testy systemu (punkt 6)
+
+- [RAPORT_TESTOW.md](RAPORT_TESTOW.md) — wyniki i pokrycie  
+- [PLAN_TESTOW.md](PLAN_TESTOW.md) — plan i macierz wymagań  
+- [smartrecipe/test/README.md](smartrecipe/test/README.md) — uruchamianie testów
+
 ### Diagramy (źródła Mermaid)
 
 Diagramy w folderze [diagrams/](diagrams/) - m.in. C4, przypadki użycia, sekwencje (w tym wzbogacanie składnika z DeepL + USDA), diagram klas.

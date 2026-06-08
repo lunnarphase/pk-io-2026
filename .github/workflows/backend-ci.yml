@@ -16,6 +16,31 @@ jobs:
     name: 🧹 BE Lint & Test
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: smartrecipe
+          POSTGRES_PASSWORD: smartrecipe
+          POSTGRES_DB: smartrecipe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U smartrecipe"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: smartrecipe
+      DB_USER: smartrecipe
+      DB_PASS: smartrecipe
+      JWT_SECRET: ci-test-jwt-secret-minimum-32-chars
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-min-32-chars
+      NODE_ENV: test
+
     steps:
       - uses: actions/checkout@v6
 
@@ -40,5 +65,8 @@ jobs:
       - name: 🧹 Prettier
         run: pnpm exec prettier --check "src/**/*.ts" "test/**/*.ts"
 
-      - name: ⚙️ Test
-        run: pnpm test
+      - name: ⚙️ Unit tests (with coverage)
+        run: pnpm test:cov
+
+      - name: ⚙️ E2E / functional tests
+        run: pnpm test:e2e
